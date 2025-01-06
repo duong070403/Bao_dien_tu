@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "BTL_Xay_dung_bao_dien_tu/1.0.0": {
+        "runtime": {
+          "BTL_Xay_dung_bao_dien_tu.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "BTL_Xay_dung_bao_dien_tu/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
