@@ -1,0 +1,80 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Duyệt Tin";
+}
+
+<h2 class="text-center">Danh Sách Tin Chờ Duyệt</h2>
+
+<table class="table table-bordered" id="newsTable">
+    <thead class="table-dark">
+        <tr>
+            <th>Tiêu đề</th>
+            <th>Tác giả</th>
+            <th>Chuyên mục</th>
+            <th>Ngày tạo</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Dữ liệu sẽ được load bằng AJAX -->
+    </tbody>
+</table>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        loadPendingNews();
+
+        function loadPendingNews() {
+            $.ajax({
+                url: "/News/PendingNews",
+                type: "GET",
+                success: function (data) {
+                    var tableBody = $("#newsTable tbody");
+                    tableBody.empty();
+                    $.each(data, function (index, item) {
+                        var row = `<tr>
+                            <td>${item.title}</td>
+                            <td>${item.authorName}</td>
+                            <td>${item.categoryName}</td>
+                            <td>${new Date(item.createdAt).toLocaleDateString()}</td>
+                            <td>
+                                <button class="btn btn-success approve-btn" data-id="${item.newsId}">Duyệt</button>
+                                <button class="btn btn-danger delete-btn" data-id="${item.newsId}">Xóa</button>
+                            </td>
+                        </tr>`;
+                        tableBody.append(row);
+                    });
+                }
+            });
+        }
+
+        $(document).on("click", ".approve-btn", function () {
+            var newsId = $(this).data("id");
+            $.ajax({
+                url: "/News/ApproveNews",
+                type: "POST",
+                data: { id: newsId },
+                success: function (response) {
+                    alert(response.message);
+                    loadPendingNews(); // Tải lại danh sách
+                }
+            });
+        });
+
+        $(document).on("click", ".delete-btn", function () {
+            var newsId = $(this).data("id");
+            if (confirm("Bạn có chắc chắn muốn xóa tin này?")) {
+                $.ajax({
+                    url: "/News/DeleteNews",
+                    type: "POST",
+                    data: { id: newsId },
+                    success: function (response) {
+                        alert(response.message);
+                        loadPendingNews(); // Tải lại danh sách
+                    }
+                });
+            }
+        });
+    });
+</script>

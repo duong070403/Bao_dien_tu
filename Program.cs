@@ -1,27 +1,29 @@
-var builder = WebApplication.CreateBuilder(args);
+﻿var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Sử dụng cấu hình từ appsettings.json
+builder.WebHost.UseKestrel()
+    .ConfigureKestrel((context, options) =>
+    {
+        options.ListenAnyIP(6001); // HTTP
+        options.ListenAnyIP(6002, listenOptions => listenOptions.UseHttps()); // HTTPS
+    });
+
+// Thêm dịch vụ MVC
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
+// Cấu hình Middleware
 app.UseStaticFiles();
 
-app.UseRouting();
+// Nếu không cần HTTPS, có thể comment dòng này lại
+app.UseHttpsRedirection();
 
+app.UseRouting();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=News}/{action=Index}/{id?}");
 
 app.Run();

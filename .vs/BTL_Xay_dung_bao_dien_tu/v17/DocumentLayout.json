@@ -1,7 +1,28 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\Asus\\Desktop\\web\\Asp.net\\BTL_Xay_dung_bao_dien_tu\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{EB28D977-D647-4E5D-BB7D-5ED868085B3C}|BTL_Xay_dung_bao_dien_tu.csproj|c:\\users\\asus\\desktop\\web\\asp.net\\btl_xay_dung_bao_dien_tu\\views\\news\\pendingapproval.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{EB28D977-D647-4E5D-BB7D-5ED868085B3C}|BTL_Xay_dung_bao_dien_tu.csproj|solutionrelative:views\\news\\pendingapproval.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB28D977-D647-4E5D-BB7D-5ED868085B3C}|BTL_Xay_dung_bao_dien_tu.csproj|c:\\users\\asus\\desktop\\web\\asp.net\\btl_xay_dung_bao_dien_tu\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB28D977-D647-4E5D-BB7D-5ED868085B3C}|BTL_Xay_dung_bao_dien_tu.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB28D977-D647-4E5D-BB7D-5ED868085B3C}|BTL_Xay_dung_bao_dien_tu.csproj|c:\\users\\asus\\desktop\\web\\asp.net\\btl_xay_dung_bao_dien_tu\\controllers\\newscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB28D977-D647-4E5D-BB7D-5ED868085B3C}|BTL_Xay_dung_bao_dien_tu.csproj|solutionrelative:controllers\\newscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB28D977-D647-4E5D-BB7D-5ED868085B3C}|BTL_Xay_dung_bao_dien_tu.csproj|c:\\users\\asus\\desktop\\web\\asp.net\\btl_xay_dung_bao_dien_tu\\models\\viewmodels\\newsapprovalviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB28D977-D647-4E5D-BB7D-5ED868085B3C}|BTL_Xay_dung_bao_dien_tu.csproj|solutionrelative:models\\viewmodels\\newsapprovalviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EB28D977-D647-4E5D-BB7D-5ED868085B3C}|BTL_Xay_dung_bao_dien_tu.csproj|c:\\users\\asus\\desktop\\web\\asp.net\\btl_xay_dung_bao_dien_tu\\models\\news.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EB28D977-D647-4E5D-BB7D-5ED868085B3C}|BTL_Xay_dung_bao_dien_tu.csproj|solutionrelative:models\\news.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,7 +30,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Bookmark",
@@ -30,6 +51,67 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "PendingApproval.cshtml",
+              "DocumentMoniker": "C:\\Users\\Asus\\Desktop\\web\\Asp.net\\BTL_Xay_dung_bao_dien_tu\\Views\\News\\PendingApproval.cshtml",
+              "RelativeDocumentMoniker": "Views\\News\\PendingApproval.cshtml",
+              "ToolTip": "C:\\Users\\Asus\\Desktop\\web\\Asp.net\\BTL_Xay_dung_bao_dien_tu\\Views\\News\\PendingApproval.cshtml",
+              "RelativeToolTip": "Views\\News\\PendingApproval.cshtml",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-02-24T13:03:07.203Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "NewsApprovalViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\Asus\\Desktop\\web\\Asp.net\\BTL_Xay_dung_bao_dien_tu\\Models\\ViewModels\\NewsApprovalViewModel.cs",
+              "RelativeDocumentMoniker": "Models\\ViewModels\\NewsApprovalViewModel.cs",
+              "ToolTip": "C:\\Users\\Asus\\Desktop\\web\\Asp.net\\BTL_Xay_dung_bao_dien_tu\\Models\\ViewModels\\NewsApprovalViewModel.cs",
+              "RelativeToolTip": "Models\\ViewModels\\NewsApprovalViewModel.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-24T12:59:52.988Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "News.cs",
+              "DocumentMoniker": "C:\\Users\\Asus\\Desktop\\web\\Asp.net\\BTL_Xay_dung_bao_dien_tu\\Models\\News.cs",
+              "RelativeDocumentMoniker": "Models\\News.cs",
+              "ToolTip": "C:\\Users\\Asus\\Desktop\\web\\Asp.net\\BTL_Xay_dung_bao_dien_tu\\Models\\News.cs",
+              "RelativeToolTip": "Models\\News.cs",
+              "ViewState": "AQIAAAMAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-24T12:57:42.836Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "NewsController.cs",
+              "DocumentMoniker": "C:\\Users\\Asus\\Desktop\\web\\Asp.net\\BTL_Xay_dung_bao_dien_tu\\Controllers\\NewsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\NewsController.cs",
+              "ToolTip": "C:\\Users\\Asus\\Desktop\\web\\Asp.net\\BTL_Xay_dung_bao_dien_tu\\Controllers\\NewsController.cs",
+              "RelativeToolTip": "Controllers\\NewsController.cs",
+              "ViewState": "AQIAAAsAAAAAAAAAAAAAwCsAAAA8AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-24T12:41:47.171Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\Asus\\Desktop\\web\\Asp.net\\BTL_Xay_dung_bao_dien_tu\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Users\\Asus\\Desktop\\web\\Asp.net\\BTL_Xay_dung_bao_dien_tu\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAB0AAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-24T11:48:40.574Z"
             }
           ]
         }

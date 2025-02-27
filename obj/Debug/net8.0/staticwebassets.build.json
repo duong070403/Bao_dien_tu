@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "2jqVqdyjWjQ0thy4kwiJDmOgIcg9we+G/5DIihGdOOY=",
+  "Hash": "R36b6MsZ/+y0Q1ZWfj2dRbtkR3HNVAgz6rTDDEWwAqI=",
   "Source": "BTL_Xay_dung_bao_dien_tu",
   "BasePath": "_content/BTL_Xay_dung_bao_dien_tu",
   "Mode": "Default",
@@ -72,6 +72,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\css\\site.css"
+    },
+    {
+      "Identity": "C:\\Users\\Asus\\Desktop\\web\\Asp.net\\BTL_Xay_dung_bao_dien_tu\\wwwroot\\css\\thuchanh.css",
+      "SourceId": "BTL_Xay_dung_bao_dien_tu",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\Asus\\Desktop\\web\\Asp.net\\BTL_Xay_dung_bao_dien_tu\\wwwroot\\",
+      "BasePath": "_content/BTL_Xay_dung_bao_dien_tu",
+      "RelativePath": "css/thuchanh.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\css\\thuchanh.css"
     },
     {
       "Identity": "C:\\Users\\Asus\\Desktop\\web\\Asp.net\\BTL_Xay_dung_bao_dien_tu\\wwwroot\\favicon.ico",

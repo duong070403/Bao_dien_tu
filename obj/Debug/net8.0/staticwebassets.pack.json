@@ -9,6 +9,10 @@
       "PackagePath": "staticwebassets\\css\\site.css"
     },
     {
+      "Id": "C:\\Users\\Asus\\Desktop\\web\\Asp.net\\BTL_Xay_dung_bao_dien_tu\\wwwroot\\css\\thuchanh.css",
+      "PackagePath": "staticwebassets\\css\\thuchanh.css"
+    },
+    {
       "Id": "C:\\Users\\Asus\\Desktop\\web\\Asp.net\\BTL_Xay_dung_bao_dien_tu\\wwwroot\\favicon.ico",
       "PackagePath": "staticwebassets\\favicon.ico"
     },
