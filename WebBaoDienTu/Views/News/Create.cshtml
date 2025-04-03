@@ -1,0 +1,108 @@
+@model WebBaoDienTu.Models.News
+
+@{
+    ViewData["Title"] = "Đăng tin mới";
+    Layout = "_Layout";
+}
+<link rel="stylesheet" href="~/css/news-create.css" />
+
+<div class="create-news-container">
+    <h2 class="page-title">Đăng tin mới</h2>
+
+    <form asp-action="Create" method="post" enctype="multipart/form-data" onsubmit="syncContent()">
+        @Html.AntiForgeryToken()
+
+        <div class="form-group">
+            <label asp-for="Title" class="form-label">
+                <i class="fas fa-heading"></i> Tiêu đề
+            </label>
+            <input asp-for="Title" class="form-control" required />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Content" class="form-label">
+                <i class="fas fa-pen-fancy"></i> Nội dung
+            </label>
+            <div id="content" contenteditable="true" oninput="syncContent()">
+                @Html.Raw(Model?.Content)
+            </div>
+            <input type="hidden" asp-for="Content" id="hiddenContent" />
+            <span asp-validation-for="Content" class="text-danger"></span>
+        </div>
+
+        <div class="image-section">
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-image"></i> Hình ảnh
+                </label>
+                <input type="text" id="imageUrl" class="form-control" placeholder="Nhập URL hình ảnh" />
+                <input type="hidden" asp-for="ImageUrl" id="hiddenImageUrl" />
+            </div>
+
+            <div class="form-group mb-2">
+                <label class="form-label">
+                    <i class="fas fa-upload"></i> Hoặc tải ảnh từ máy
+                </label>
+                <input type="file" id="imageFile" name="ImageFile" class="form-control" accept="image/*" />
+            </div>
+
+            <button type="button" class="btn btn-image-select" onclick="handleImageSelection()">
+                <i class="fas fa-plus"></i> Thêm ảnh
+            </button>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="CategoryId" class="form-label">
+                <i class="fas fa-folder"></i> Danh mục
+            </label>
+            <select asp-for="CategoryId" asp-items="ViewBag.CategoryId" class="form-control">
+                <option value="">-- Chọn danh mục --</option>
+            </select>
+            <span asp-validation-for="CategoryId" class="text-danger"></span>
+        </div>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-submit">
+                <i class="fas fa-paper-plane"></i> Đăng tin
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        function syncContent() {
+            document.getElementById("hiddenContent").value = document.getElementById("content").innerHTML.trim();
+        }
+
+        document.getElementById("content").addEventListener("blur", syncContent);
+
+        function handleImageSelection() {
+            let imageUrlInput = document.getElementById("imageUrl");
+            let imageFileInput = document.getElementById("imageFile");
+            let contentDiv = document.getElementById("content");
+            let hiddenImageUrl = document.getElementById("hiddenImageUrl");
+
+            if (imageUrlInput.value.trim() !== "") {
+                let imgTag = `<img src="${imageUrlInput.value}" alt="Ảnh tin tức" style="max-width:80%; margin-top:10px;">`;
+                contentDiv.innerHTML += imgTag;
+                hiddenImageUrl.value = imageUrlInput.value;
+                imageUrlInput.value = "";
+            } else if (imageFileInput.files.length > 0) {
+                let reader = new FileReader();
+                reader.onload = function (e) {
+                    let imgTag = `<img src="${e.target.result}" alt="Ảnh tin tức" style="max-width:80%; margin-top:10px;">`;
+                    contentDiv.innerHTML += imgTag;
+                    hiddenImageUrl.value = e.target.result;
+                    syncContent();
+                };
+                reader.readAsDataURL(imageFileInput.files[0]);
+            } else {
+                alert("Vui lòng nhập URL hoặc chọn một ảnh.");
+            }
+
+            syncContent();
+        }
+    </script>
+}
