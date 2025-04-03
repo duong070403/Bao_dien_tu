@@ -1,0 +1,44 @@
+@model WebBaoDienTu.Models.News
+
+@{
+    ViewData["Title"] = "Xác nhận xóa - " + Model.Title;
+    Layout = "_Layout"; 
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <h1 class="fw-bold text-danger">⚠️ Xóa bài viết</h1>
+            <p class="text-muted">🕒 @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm") | 🖊️ Tác giả: @Model.Author.FullName</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 offset-md-2 text-center">
+            <h3 class="fw-bold">@Model.Title</h3>
+
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <div class="text-center mb-3">
+                    <img src="@Model.ImageUrl" alt="Ảnh minh họa" class="img-fluid rounded shadow-sm" style="max-height: 400px; object-fit: cover;">
+                </div>
+            }
+
+            <div class="alert alert-danger fw-bold">
+                ❗ Bạn có chắc chắn muốn xóa bài viết này? Hành động này không thể hoàn tác!
+            </div>
+
+            <form asp-action="Delete" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="NewsId" />
+
+                <button type="submit" class="btn btn-danger btn-lg px-4">
+                    <i class="fas fa-trash"></i> Xóa bài viết
+                </button>
+                <a asp-action="Index" class="btn btn-secondary btn-lg px-4 ms-2">
+                    <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
