@@ -1,0 +1,132 @@
+﻿/* HomeStyle.css */
+
+/* Hiệu ứng cho container chính */
+.container {
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Hiệu ứng cho tiêu đề "Bảng tin hot nhất hôm nay" */
+.hot-title {
+    font-family: 'Pacifico', cursive;
+    color: #d63384;
+    font-size: 2rem;
+    text-align: left;
+    margin-bottom: 20px;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+    .hot-title::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 100px;
+        height: 3px;
+        background: linear-gradient(90deg, #d63384, #ff6f91);
+        border-radius: 2px;
+        animation: slideIn 1s ease-out;
+        transition: width 0.3s ease;
+    }
+
+    .hot-title:hover {
+        color: #ff6f91;
+    }
+
+        .hot-title:hover::after {
+            width: 150px;
+        }
+
+@keyframes slideIn {
+    from {
+        width: 0;
+    }
+
+    to {
+        width: 100px;
+    }
+}
+
+/* Hiệu ứng cho card bài báo */
+.card {
+    transition: all 0.3s ease;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+/* Hiệu ứng cho ảnh trong card */
+.news-image {
+    transition: all 0.4s ease;
+    object-fit: cover;
+    height: 200px; /* Đảm bảo ảnh đồng đều */
+}
+
+.large-news-image {
+    height: 300px; /* Ảnh lớn ở row 1 */
+}
+
+.card:hover .news-image {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+/* Hiệu ứng cho tiêu đề bài báo */
+.card-title {
+    font-size: 1.25rem;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+.card:hover .card-title {
+    color: #d63384;
+}
+
+/* Hiệu ứng cho liên kết "Xem thêm" */
+.read-more {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+    .read-more:hover {
+        color: #0056b3;
+        transform: translateX(5px);
+    }
+
+/* Hiệu ứng cho row */
+.news-row {
+    animation: rowFade 1s ease-in-out;
+}
+
+@keyframes rowFade {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

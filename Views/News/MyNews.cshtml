@@ -1,0 +1,194 @@
+﻿@model IEnumerable<WebBaoDienTu.Models.News>
+
+@{
+    ViewData["Title"] = "Lịch sử tin tức của tôi";
+    Layout = "_Layout";
+}
+
+<link rel="stylesheet" href="~/css/news-index.css" asp-append-version="true" />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" /> 
+
+<h2 class="page-title">@ViewData["Title"]</h2>
+
+<div class="news-container mt-4 d-flex justify-content-center">
+    <div class="col-md-10">
+        <div class="table-responsive">
+            <table class="news-table table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Tiêu đề</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày đăng</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var isExpired = !item.IsApproved && (DateTime.Now - item.CreatedAt).TotalDays > 1;
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                            <td class="text-center">
+                                <!-- Căn giữa trạng thái -->
+                                @if (item.IsApproved)
+                                {
+                                    <span class="badge bg-success">Đã duyệt</span>
+                                }
+                                else if (item.IsArchived)
+                                {
+                                    <span class="badge bg-secondary">Lưu trữ</span>
+                                }
+                                else if (isExpired)
+                                {
+                                    <span class="badge bg-danger">Hết hạn</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">Chưa duyệt</span>
+                                }
+                            </td>
+                            <td>@item.CreatedAt.ToString("dd/MM/yyyy")</td>
+                            <td class="action-buttons text-center">
+                                <!-- Căn giữa thao tác -->
+                                @if (!item.IsApproved && !item.IsArchived && !isExpired)
+                                {
+                                    <form asp-action="Archive" asp-route-id="@item.NewsId" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('Bạn có chắc chắn muốn hủy?');">
+                                            <i class="fas fa-times"></i> Hủy
+                                        </button>
+                                    </form>
+                                }
+                                else if (isExpired)
+                                {
+                                    <form asp-action="Repost" asp-route-id="@item.NewsId" method="post" class="repost-form" style="display:inline;">
+                                        <button type="submit" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-redo"></i> Đăng lại
+                                        </button>
+                                    </form>
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="showDeleteModal(@item.NewsId)">
+                                        <i class="fas fa-trash"></i> Xóa
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Xác nhận xóa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h3 class="fw-bold" id="newsTitle"></h3>
+                <p class="text-muted" id="newsDetails"></p>
+                <div id="newsImageContainer" class="text-center mb-3"></div>
+                <div class="alert alert-danger fw-bold">
+                    ❗ Bạn có chắc chắn muốn xóa bài viết này? Hành động này không thể hoàn tác!
+                </div>
+                <input type="hidden" id="deleteNewsId" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteButton">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast thông báo -->
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="successToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fas fa-check-circle me-2"></i> 
+                <span id="toastMessage">Thao tác thành công!</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showDeleteModal(newsId) {
+            $.ajax({
+                url: '/News/GetNewsDetailsForDelete/' + newsId,
+                type: 'GET',
+                success: function (result) {
+                    $('#newsTitle').text(result.title);
+                    $('#newsDetails').text('🕒 ' + result.createdAt + ' | 🖊️ Tác giả: ' + result.authorFullName);
+                    if (result.imageUrl) {
+                        $('#newsImageContainer').html('<img src="' + result.imageUrl + '" alt="Ảnh minh họa" class="img-fluid rounded shadow-sm" style="max-height: 200px; object-fit: cover;">');
+                    } else {
+                        $('#newsImageContainer').html('');
+                    }
+                    $('#deleteNewsId').val(newsId);
+                    var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+                    deleteModal.show();
+                },
+                error: function (xhr, status, error) {
+                    showToast('Không thể tải chi tiết tin tức: ' + error, 'danger');
+                }
+            });
+        }
+
+        document.getElementById('confirmDeleteButton').addEventListener('click', function () {
+            var newsId = $('#deleteNewsId').val();
+            $.ajax({
+                type: "POST",
+                url: "/News/DeleteConfirmed/" + newsId,
+                headers: {
+                    "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function (response) {
+                    var deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+                    deleteModal.hide();
+                    showToast('Xóa tin tức thành công!', 'success');
+                    setTimeout(function() { location.reload(); }, 1500);
+                },
+                error: function (xhr) {
+                    showToast('Có lỗi xảy ra khi xóa: ' + (xhr.responseJSON?.message || xhr.statusText), 'danger');
+                }
+            });
+        });
+
+        $('.repost-form').submit(function (e) {
+            e.preventDefault();
+            var form = $(this);
+            $.ajax({
+                type: "POST",
+                url: form.attr('action'),
+                data: form.serialize(),
+                success: function (response) {
+                    if (response.success) {
+                        showToast(response.message || 'Đăng lại thành công!', 'success');
+                        setTimeout(function() { location.reload(); }, 1500);
+                    } else {
+                        showToast(response.message || 'Đăng lại thất bại!', 'danger');
+                    }
+                },
+                error: function (xhr) {
+                    showToast('Có lỗi xảy ra khi đăng lại: ' + (xhr.responseJSON?.message || xhr.statusText), 'danger');
+                }
+            });
+        });
+
+        function showToast(message, type) {
+            var toast = document.getElementById('successToast');
+            toast.classList.remove('bg-success', 'bg-danger');
+            toast.classList.add(type === 'danger' ? 'bg-danger' : 'bg-success');
+            document.getElementById('toastMessage').textContent = message;
+            var bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+        }
+    </script>
+}
