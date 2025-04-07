@@ -25,9 +25,9 @@ function logoutUser() {
   });
 }
 
-$(document).ready(function () {
+$(function () {
   initializeDropdown();
-  $("#loginForm").submit(function (e) {
+    $("#loginForm").on('submit', function (e) {
     e.preventDefault();
     $("#loginErrorMessage").hide();
     $(this).find('button[type="submit"]').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...');
@@ -66,7 +66,7 @@ $(document).ready(function () {
     });
   });
 
-  $("#registerForm").submit(function (e) {
+    $("#registerForm").on('submit', function (e) {
     e.preventDefault();
     $("#registerErrorMessage").hide();
     $(this).find('button[type="submit"]').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...');
@@ -243,7 +243,7 @@ $(document).ready(function () {
     });
   }
 
-  $("#markAllAsRead").click(function (e) {
+    $("#markAllAsRead").on('click', function (e) {
     e.preventDefault();
     e.stopPropagation();
     $.ajax({

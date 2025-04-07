@@ -86,11 +86,11 @@ namespace WebBaoDienTu.Controllers
                 }
 
                 var newsItems = await query
-                    .OrderByDescending(n => !n.IsApproved) // Pending items first
-                    .ThenByDescending(n => n.CreatedAt)    // Then by date
+                    .OrderByDescending(n => !n.IsApproved) 
+                    .ThenByDescending(n => n.CreatedAt)    
                     .ToListAsync();
 
-                // Store filter values in ViewData to maintain state in the view
+
                 ViewData["TitleFilter"] = title;
                 ViewData["AuthorFilter"] = author;
                 ViewData["DateFilter"] = date?.ToString("yyyy-MM-dd");
@@ -105,7 +105,7 @@ namespace WebBaoDienTu.Controllers
             {
                 _logger.LogError(ex, "Error in Index action");
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách tin tức.";
-                return View(new List<News>());
+                return View("List", new List<News>()); // Change "Index" to "List"
             }
         }
 
@@ -567,17 +567,60 @@ namespace WebBaoDienTu.Controllers
             }
         }
 
+        // GET: News/GetArchivedNewsDetails/5
+        [Authorize(Roles = "User")]
+        public async Task<IActionResult> GetArchivedNewsDetails(int id)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId) || !int.TryParse(userId, out int authorId))
+                    return Json(new { success = false, message = "Không thể xác định người dùng hiện tại." });
 
+                var news = await _context.News
+                    .Include(n => n.Category)
+                    .FirstOrDefaultAsync(m => m.NewsId == id && m.AuthorId == authorId);
+
+                if (news == null)
+                    return NotFound();
+
+                return Json(new
+                {
+                    success = true,
+                    newsId = news.NewsId,
+                    title = news.Title,
+                    content = news.Content,
+                    imageUrl = news.ImageUrl,
+                    categoryName = news.Category.CategoryName,
+                    isArchived = news.IsArchived,
+                    isExpired = !news.IsApproved && (DateTime.Now - news.CreatedAt).TotalDays > 1
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetArchivedNewsDetails for ID: {Id}", id);
+                return Json(new { success = false, message = "Không thể tải chi tiết tin tức." });
+            }
+        }
+
+
+        // POST: News/Archive/5
         // POST: News/Archive/5
         [Authorize(Roles = "User")]
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Archive(int id)
         {
             try
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (string.IsNullOrEmpty(userId) || !int.TryParse(userId, out int authorId))
+                {
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                        return Json(new { success = false, message = "Vui lòng đăng nhập lại." });
+
                     return RedirectToAction("Login", "Account");
+                }
 
                 var newsItem = await _context.News.FirstOrDefaultAsync(n => n.NewsId == id && n.AuthorId == authorId);
                 if (newsItem != null && !newsItem.IsApproved)
@@ -586,10 +629,17 @@ namespace WebBaoDienTu.Controllers
                     _context.Update(newsItem);
                     await _context.SaveChangesAsync();
                     _logger.LogInformation("News archived, ID: {NewsId}", newsItem.NewsId);
+
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                        return Json(new { success = true, message = "Tin tức đã được lưu trữ thành công." });
+
                     TempData["SuccessMessage"] = "Tin tức đã được lưu trữ.";
                 }
                 else
                 {
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                        return Json(new { success = false, message = "Không thể lưu trữ tin tức này." });
+
                     TempData["ErrorMessage"] = "Không thể lưu trữ tin tức này.";
                 }
 
@@ -598,10 +648,15 @@ namespace WebBaoDienTu.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in Archive action for ID: {Id}", id);
+
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = false, message = "Có lỗi xảy ra khi lưu trữ tin tức." });
+
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi lưu trữ tin tức.";
                 return RedirectToAction("MyNews");
             }
         }
+
 
         // POST: News/Repost/5
         [Authorize(Roles = "User")]
@@ -707,87 +762,98 @@ namespace WebBaoDienTu.Controllers
             }
         }
 
-        private async Task<string?> DownloadAndSaveImageFromUrl(string? imageUrl)
+       private async Task<string?> DownloadAndSaveImageFromUrl(string? imageUrl)
+{
+    if (string.IsNullOrEmpty(imageUrl))
+    {
+        return null;
+    }
+
+    try
+    {
+        // Check if it's a base64 image
+        if (imageUrl.StartsWith("data:image"))
         {
-            if (string.IsNullOrEmpty(imageUrl))
+            return SaveBase64Image(imageUrl);
+        }
+
+        // Check if it's an existing image path in our system (starts with /images/)
+        if (imageUrl.StartsWith("/images/"))
+        {
+            // Verify file exists
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", imageUrl.TrimStart('/'));
+            if (System.IO.File.Exists(filePath))
             {
-                return null;
+                // This is already a valid image in our system, return as is
+                return imageUrl;
             }
+        }
 
-            try
+        // Check if URL is valid for external images
+        if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out Uri? uri) ||
+            uri == null || (uri.Scheme != "http" && uri.Scheme != "https"))
+        {
+            _logger.LogWarning("Invalid image URL format: {ImageUrl}", imageUrl);
+            return null;
+        }
+
+        // Rest of your existing HTTP download code
+        using var httpClient = new HttpClient();
+        httpClient.Timeout = TimeSpan.FromSeconds(10);
+        httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 WebBaoDienTuApp");
+
+        // Try to get head first to check content type
+        try
+        {
+            var headResponse = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, uri));
+            if (!headResponse.IsSuccessStatusCode ||
+                headResponse.Content.Headers.ContentType == null ||
+                (headResponse.Content.Headers.ContentType != null &&
+                !headResponse.Content.Headers.ContentType.MediaType?.StartsWith("image/") == true))
             {
-                // Check if it's a base64 image
-                if (imageUrl.StartsWith("data:image"))
-                {
-                    return SaveBase64Image(imageUrl);
-                }
-
-                // Check if URL is valid
-                if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out Uri? uri) ||
-                    uri == null || (uri.Scheme != "http" && uri.Scheme != "https"))
-                {
-                    _logger.LogWarning("Invalid image URL format: {ImageUrl}", imageUrl);
-                    return null;
-                }
-
-                // Rest of your existing HTTP download code
-                using var httpClient = new HttpClient();
-                httpClient.Timeout = TimeSpan.FromSeconds(10);
-                httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 WebBaoDienTuApp");
-
-                // Try to get head first to check content type
-                try
-                {
-                    var headResponse = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, uri));
-                    if (!headResponse.IsSuccessStatusCode ||
-                        headResponse.Content.Headers.ContentType == null ||
-                        (headResponse.Content.Headers.ContentType != null &&
-                         !headResponse.Content.Headers.ContentType.MediaType?.StartsWith("image/") == true))
-                    {
-                        _logger.LogWarning("URL does not point to a valid image: {ImageUrl}", imageUrl);
-                        return null;
-                    }
-                }
-                catch
-                {
-                    // Some servers don't support HEAD requests, continue anyway
-                }
-
-
-
-                // Download the image
-                byte[] imageData = await httpClient.GetByteArrayAsync(uri);
-                if (imageData.Length == 0)
-                {
-                    _logger.LogWarning("Downloaded image has zero length: {ImageUrl}", imageUrl);
-                    return null;
-                }
-
-                // Determine file extension based on content or URL
-                string fileExtension = ".jpg"; // Default
-
-                // Try to get extension from URL
-                string urlExtension = Path.GetExtension(uri.AbsolutePath).ToLower();
-                if (!string.IsNullOrEmpty(urlExtension) &&
-                    new[] { ".jpg", ".jpeg", ".png", ".gif" }.Contains(urlExtension))
-                {
-                    fileExtension = urlExtension;
-                }
-
-                return SaveImageData(imageData, fileExtension);
-            }
-            catch (HttpRequestException ex)
-            {
-                _logger.LogError(ex, "HTTP error downloading image from URL: {ImageUrl}, Status: {Status}",
-                    imageUrl, ex.StatusCode);
-                return null;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error downloading image from URL: {ImageUrl}", imageUrl);
+                _logger.LogWarning("URL does not point to a valid image: {ImageUrl}", imageUrl);
                 return null;
             }
         }
+        catch
+        {
+            // Some servers don't support HEAD requests, continue anyway
+        }
+
+        // Download the image
+        byte[] imageData = await httpClient.GetByteArrayAsync(uri);
+        if (imageData.Length == 0)
+        {
+            _logger.LogWarning("Downloaded image has zero length: {ImageUrl}", imageUrl);
+            return null;
+        }
+
+        // Determine file extension based on content or URL
+        string fileExtension = ".jpg"; // Default
+
+        // Try to get extension from URL
+        string urlExtension = Path.GetExtension(uri.AbsolutePath).ToLower();
+        if (!string.IsNullOrEmpty(urlExtension) &&
+            new[] { ".jpg", ".jpeg", ".png", ".gif" }.Contains(urlExtension))
+        {
+            fileExtension = urlExtension;
+        }
+
+        return SaveImageData(imageData, fileExtension);
+    }
+    catch (HttpRequestException ex)
+    {
+        _logger.LogError(ex, "HTTP error downloading image from URL: {ImageUrl}, Status: {Status}",
+            imageUrl, ex.StatusCode);
+        return null;
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error downloading image from URL: {ImageUrl}", imageUrl);
+        return null;
+    }
+}
+
 
         private string? SaveBase64Image(string base64String)
         {
