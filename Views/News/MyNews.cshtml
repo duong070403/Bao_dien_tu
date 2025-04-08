@@ -1,4 +1,5 @@
-﻿@model IEnumerable<WebBaoDienTu.Models.News>
+﻿@* Updated MyNews.cshtml file with edit for pending and delete for archived news *@
+@model IEnumerable<WebBaoDienTu.Models.News>
 
 @{
     ViewData["Title"] = "Lịch sử tin tức của tôi";
@@ -83,9 +84,15 @@
                                     <button type="button" class="btn btn-info" onclick="showArchivedNewsDetails(@item.NewsId, 'archive')">
                                         <i class="fas fa-eye"></i> Xem
                                     </button>
+                                    <button type="button" class="btn btn-danger" onclick="showDeleteModal(@item.NewsId)">
+                                        <i class="fas fa-trash"></i> Xóa
+                                    </button>
                                 }
                                 @if (!item.IsApproved && !item.IsArchived && !isExpired)
                                 {
+                                    <a href="@Url.Action("UserEdit", "News", new { id = item.NewsId })" class="btn btn-primary">
+                                        <i class="fas fa-edit"></i> Sửa
+                                    </a>
                                     <button type="button" class="btn btn-warning" onclick="showCancelModal(@item.NewsId)">
                                         <i class="fas fa-times"></i> Hủy
                                     </button>
@@ -168,9 +175,15 @@
                                         <button type="button" class="btn btn-info btn-sm" onclick="showArchivedNewsDetails(@item.NewsId, 'archive')">
                                             <i class="fas fa-eye"></i>
                                         </button>
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="showDeleteModal(@item.NewsId)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     }
                                     @if (!item.IsApproved && !item.IsArchived && !isExpired)
                                     {
+                                        <a href="@Url.Action("UserEdit", "News", new { id = item.NewsId })" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
                                         <button type="button" class="btn btn-warning btn-sm" onclick="showCancelModal(@item.NewsId)">
                                             <i class="fas fa-times"></i>
                                         </button>
@@ -236,7 +249,7 @@
     </div>
 </div>
 
-<!-- Cancel Confirmation Modal -->
+<!-- Update the Cancel Confirmation Modal in MyNews.cshtml -->
 <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content animate-modal">
@@ -248,8 +261,10 @@
             </div>
             <div class="modal-body">
                 <h3 class="fw-bold text-center" id="cancelNewsTitle"></h3>
+                <p class="text-muted text-center" id="cancelNewsDetails"></p>
+                <div id="cancelNewsImageContainer" class="text-center mb-3"></div>
                 <div class="alert alert-warning text-center animate-alert">
-                    <p>Bạn có chắc chắn muốn hủy bài viết này? Bài viết sẽ được chuyển vào mục lưu trữ.</p>
+                    <p><i class="fas fa-info-circle me-2"></i> Bạn có chắc chắn muốn hủy bài viết này? Bài viết sẽ được chuyển vào mục lưu trữ.</p>
                 </div>
                 <input type="hidden" id="cancelNewsId" />
             </div>
@@ -264,6 +279,7 @@
         </div>
     </div>
 </div>
+
 
 <!-- Archived News Details Modal -->
 <div class="modal fade" id="archivedNewsModal" tabindex="-1" aria-labelledby="archivedNewsModalLabel" aria-hidden="true">

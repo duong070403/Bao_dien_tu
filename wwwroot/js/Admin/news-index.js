@@ -1,4 +1,4 @@
-﻿// wwwroot/js/admin/news-index.js
+﻿// wwwroot/js/Admin/news-index.js
 
 function showDetailsModal(newsId) {
     $.ajax({
@@ -53,12 +53,9 @@ function showDetailsModal(newsId) {
                 // Hiển thị danh mục
                 $('#detailsCategory').html('📌 Danh mục: ' + result.categoryName);
 
-                // Xử lý các nút hành động
+                // Xử lý các nút hành động - Removed edit button
                 let actionsHtml = `
-                    <a href="/News/Edit/${result.newsId}" class="btn btn-warning">
-                        <i class="fas fa-edit"></i> Sửa bài viết
-                    </a>
-                    <button type="button" class="btn btn-secondary ms-2" data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="fas fa-arrow-left"></i> Quay lại danh sách
                     </button>
                 `;
@@ -103,24 +100,77 @@ function showApproveModalFromDetails(newsId) {
     }, 500); // Đợi modal chi tiết đóng hoàn toàn
 }
 
+// Corrected deleteNews function
 function deleteNews() {
     var newsId = $('#deleteNewsId').val();
-    $.ajax({
-        url: '/News/Delete/' + newsId,
-        type: 'POST',
-        data: { __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() },
-        success: function (result) {
+
+    // Get the token
+    var token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+    // Send the delete request with proper headers
+    fetch('/News/Delete/' + newsId, {
+        method: 'POST',
+        headers: {
+            'RequestVerificationToken': token,
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => response.json())
+        .then(result => {
             if (result.success) {
-                $('#news-' + newsId).fadeOut(300, function () { $(this).remove(); });
+                // Hide the modal
                 var deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
                 deleteModal.hide();
+
+                // Show success message
                 showToast('Xóa thành công!', 'success');
+
+                // Remove the deleted item from the DOM
+                var row = document.getElementById('news-' + newsId);
+                if (row) {
+                    row.style.opacity = '0';
+                    setTimeout(() => row.remove(), 300);
+                }
+
+                // Update counts
+                var totalCount = parseInt($('#totalNewsCount').text()) - 1;
+                $('#totalNewsCount').text(totalCount);
+
+                if (result.wasApproved) {
+                    var approvedCount = parseInt($('#approvedCount').text()) - 1;
+                    $('#approvedCount').text(approvedCount);
+                } else {
+                    var pendingCount = parseInt($('#pendingCount').text()) - 1;
+                    $('#pendingCount').text(pendingCount);
+                }
             } else {
-                showToast(result.message, 'danger');
+                showToast(result.message || 'Xóa thất bại', 'danger');
             }
+        })
+        .catch(error => {
+            showToast('Xóa thất bại: ' + error, 'danger');
+        });
+}
+
+function showDeleteModal(newsId) {
+    $.ajax({
+        url: '/News/GetNewsDetailsForDelete/' + newsId,
+        type: 'GET',
+        success: function (result) {
+            $('#newsTitle').text(result.title);
+            $('#newsDetails').text('🕒 ' + result.createdAt + ' | 🖊️ Tác giả: ' + result.authorFullName);
+
+            const imageContainer = document.getElementById('newsImageContainer');
+            imageContainer.innerHTML = result.imageUrl ?
+                `<img src="${result.imageUrl}" alt="Ảnh minh họa" class="img-fluid rounded shadow-sm animate-image" style="max-height: 200px; object-fit: cover;">` : '';
+
+            $('#deleteNewsId').val(newsId);
+
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
         },
         error: function (xhr, status, error) {
-            showToast('Xóa thất bại: ' + error, 'danger');
+            showToast('Không thể tải chi tiết tin tức: ' + error, 'danger');
         }
     });
 }
@@ -159,11 +209,17 @@ function showApproveModal(newsId) {
 
 function approveNews() {
     var newsId = $('#approveNewsId').val();
-    $.ajax({
-        url: '/News/Approve/' + newsId,
-        type: 'POST',
-        data: { __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() },
-        success: function (result) {
+    var token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+    fetch('/News/Approve/' + newsId, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'RequestVerificationToken': token
+        }
+    })
+        .then(response => response.json())
+        .then(result => {
             if (result.success) {
                 var approveModal = bootstrap.Modal.getInstance(document.getElementById('approveModal'));
                 approveModal.hide();
@@ -176,11 +232,10 @@ function approveNews() {
             } else {
                 showToast(result.message || 'Duyệt thất bại', 'danger');
             }
-        },
-        error: function (xhr, status, error) {
+        })
+        .catch(error => {
             showToast('Duyệt thất bại: ' + error, 'danger');
-        }
-    });
+        });
 }
 
 function showToast(message, type) {

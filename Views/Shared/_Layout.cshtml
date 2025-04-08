@@ -15,6 +15,10 @@
     <link rel="stylesheet" href="~/css/layout/title.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/layout/auth.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/layout/notification.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/global-button-effects.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/global-button-effects.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/layout/footer.css" asp-append-version="true" />
+
 </head>
 <body>
     <header>
@@ -82,12 +86,7 @@
                         <div class="nav-item dropdown ms-auto">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <span class="username">@(User.Claims.FirstOrDefault(c => c.Type == "DisplayName")?.Value ?? User.Claims.FirstOrDefault(c => c.Type == "FullName")?.Value ?? User.Identity.Name)</span>
-                                @{
-                                    var random = new Random();
-                                    var icons = new[] { "fa-user-gear", "fa-user-circle", "fa-user-astronaut", "fa-user-tie", "fa-user-secret" };
-                                    var selectedIcon = icons[random.Next(icons.Length)];
-                                }
-                                <i class="fas @selectedIcon ms-2"></i>
+                                <i class="fas fa-user-circle account-icon"></i>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                 @if (User.IsInRole("Admin"))
@@ -101,9 +100,11 @@
                                 }
                                 <li><a class="dropdown-item" asp-controller="Sharing" asp-action="MyShares"><i class="fas fa-share-alt"></i> Tin đã chia sẻ</a></li>
                                 <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal"><i class="fas fa-key"></i> Đổi mật khẩu</a></li>
                                 <li><a class="dropdown-item" href="javascript:void(0);" onclick="logoutUser()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></li>
                             </ul>
                         </div>
+
                     }
                     else
                     {
@@ -228,6 +229,45 @@
             </div>
         </div>
 
+        <!-- Change Password Modal -->
+        <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content change-password-modal">
+                    <div class="modal-header">
+                        <h5 class="modal-title modal-title-animated" id="changePasswordModalLabel">
+                            <i class="fas fa-key me-2"></i> Đổi mật khẩu
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted mb-3">Để bảo mật tài khoản, vui lòng không chia sẻ mật khẩu với người khác.</p>
+                        <form id="changePasswordForm">
+                            <div class="alert alert-danger" id="passwordErrorMessage" style="display: none;"></div>
+                            <div class="mb-3 form-group">
+                                <label for="currentPassword" class="form-label"><i class="fas fa-lock me-1"></i> Mật khẩu hiện tại</label>
+                                <input type="password" class="form-control" id="currentPassword" placeholder="Nhập mật khẩu hiện tại" required>
+                            </div>
+                            <div class="mb-3 form-group">
+                                <label for="newPassword" class="form-label"><i class="fas fa-key me-1"></i> Mật khẩu mới</label>
+                                <input type="password" class="form-control" id="newPassword" placeholder="Nhập mật khẩu mới" required>
+                            </div>
+                            <div class="mb-3 form-group">
+                                <label for="confirmNewPassword" class="form-label"><i class="fas fa-check me-1"></i> Xác nhận mật khẩu</label>
+                                <input type="password" class="form-control" id="confirmNewPassword" placeholder="Nhập lại mật khẩu mới" required>
+                            </div>
+                            <div class="password-requirements mb-3">
+                                <p class="text-muted"><small>Mật khẩu phải từ 6-8 ký tự, chứa ít nhất một chữ cái in hoa và một số.</small></p>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-save me-2"></i> Cập nhật mật khẩu
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
         <!-- Debug Modal -->
         <div class="modal fade" id="debugModal" tabindex="-1" aria-labelledby="debugModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -270,15 +310,79 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted py-3">
+    <footer class="footer-area">
+        <div class="footer-wave"></div>
         <div class="container">
-            © 2025 - WebBaoDienTu - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
+                    <div class="footer-info">
+                        <h3>Web Báo Điện Tử</h3>
+                        <p>Cập nhật tin tức mới nhất, nhanh nhất và chính xác nhất về các sự kiện trong nước và quốc tế.</p>
+                        <div class="social-icons">
+                            <a href="https://www.facebook.com/pham.manhluc.5?mibextid=ZbWKwL" target="_blank" class="social-icon facebook" aria-label="Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="https://www.instagram.com/phamluc0423/" target="_blank" class="social-icon instagram" aria-label="Instagram">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="https://zalo.me" target="_blank" class="social-icon zalo" aria-label="Zalo">
+                                <i class="fab fa-telegram-plane"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
+                    <div class="footer-links">
+                        <h4>Đội ngũ phát triển</h4>
+                        <ul>
+                            <li><a asp-area="" asp-controller="Home" asp-action="Index"><i class="fas fa-angle-right"></i> Phạm Mạnh Lực</a></li>
+                            <li><a asp-area="" asp-controller="Home" asp-action="Privacy"><i class="fas fa-angle-right"></i> Lê Văn Đạt</a></li>
+                            <li><a asp-area="" asp-controller="News" asp-action="Create"><i class="fas fa-angle-right"></i> Lê Quốc Duy</a></li>
+                            <li><a asp-area="" asp-controller="News" asp-action="MyNews"><i class="fas fa-angle-right"></i> Trương Ngọc Dương</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-12">
+                    <div class="footer-newsletter">
+                        <h4>Đăng ký nhận tin</h4>
+                        <p>Đăng ký để nhận thông tin mới nhất từ chúng tôi</p>
+                        <form action="" method="post" class="newsletter-form">
+                            <input type="email" name="email" placeholder="Email của bạn">
+                            <button type="submit" class="btn-subscribe"><i class="fas fa-paper-plane"></i></button>
+                        </form>
+                        <div class="mt-4">
+                            <p class="mb-2">Tải ứng dụng:</p>
+                            <div class="app-links">
+                                <a href="#" class="me-3"><i class="fab fa-google-play me-2"></i>Google Play</a>
+                                <a href="#"><i class="fab fa-app-store-ios me-2"></i>App Store</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <div class="copyright">
+                    © 2025 <strong>WebBaoDienTu</strong>. All Rights Reserved
+                </div>
+                <div class="credits">
+                    Thiết kế bởi <a href="#">Nhóm 18</a>
+                </div>
+            </div>
         </div>
     </footer>
 
+
+
+    <!-- Add this right before the closing </body> tag in _Layout.cshtml -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/hover-dropdown.js" asp-append-version="true"></script>
     <script src="~/js/Admin/layout.js" asp-append-version="true"></script>
+    <script src="~/js/global-button-effects.js" asp-append-version="true"></script>
+    <script src="~/js/notification-bell.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

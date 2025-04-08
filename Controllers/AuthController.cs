@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using WebBaoDienTu.Models;
 using Microsoft.AspNetCore.Mvc.ViewFeatures; 
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebBaoDienTu.Controllers
 {
@@ -15,11 +16,13 @@ namespace WebBaoDienTu.Controllers
     public class AuthController : ControllerBase
     {
         private readonly BaoDienTuContext _context;
+        private readonly ILogger<AuthController> _logger;
         private readonly ITempDataDictionaryFactory _tempDataDictionaryFactory; 
 
-        public AuthController(BaoDienTuContext context, ITempDataDictionaryFactory tempDataDictionaryFactory) 
+        public AuthController(BaoDienTuContext context, ILogger<AuthController> logger, ITempDataDictionaryFactory tempDataDictionaryFactory) 
         {
             _context = context;
+            _logger = logger;
             _tempDataDictionaryFactory = tempDataDictionaryFactory;
         }
 
@@ -93,6 +96,36 @@ namespace WebBaoDienTu.Controllers
 
         private async Task<bool> EmailExistsInRealLife(string email)
         {
+            // TEMPORARY MODIFICATION: Bypass real email verification with Google API
+            // Only perform basic email format validation
+
+            await Task.CompletedTask; // Temporary await to suppress warning
+            // Check if the email has a valid basic format
+            if (string.IsNullOrWhiteSpace(email) || !email.Contains("@") || !email.Contains("."))
+            {
+                return false;
+            }
+
+            // Split the email into parts
+            var parts = email.Split('@');
+            if (parts.Length != 2)
+            {
+                return false;
+            }
+
+            var domain = parts[1];
+
+            // Check if domain has at least one dot and ends with a valid TLD
+            if (!domain.Contains('.') || domain.EndsWith("."))
+            {
+                return false;
+            }
+
+            // Basic format is valid, consider it deliverable
+            _logger.LogWarning("NOTICE: Real email verification is temporarily disabled. Using basic format validation only.");
+            return true;
+
+            /* ORIGINAL CODE - COMMENTED OUT
             string apiKey = "2b48740977c743faa37dd2794057637d";
 
             using (var handler = new HttpClientHandler())
@@ -113,6 +146,7 @@ namespace WebBaoDienTu.Controllers
                 }
             }
             return false;
+            */
         }
 
 
@@ -161,6 +195,71 @@ namespace WebBaoDienTu.Controllers
                 });
         }
 
+        [HttpPost("changePassword")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromForm] ChangePasswordModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { success = false, message = "Thông tin không hợp lệ." });
+            }
+
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId) || !int.TryParse(userId, out int id))
+                {
+                    return Unauthorized(new { success = false, message = "Bạn cần đăng nhập lại." });
+                }
+
+                var user = await _context.Users.FindAsync(id);
+                if (user == null)
+                {
+                    return NotFound(new { success = false, message = "Người dùng không tồn tại." });
+                }
+
+                // Verify current password
+                if (user.PasswordHash != HashPassword(model.CurrentPassword))
+                {
+                    return BadRequest(new { success = false, message = "Mật khẩu hiện tại không đúng." });
+                }
+
+                // Check if new password is the same as current password
+                if (HashPassword(model.NewPassword) == user.PasswordHash)
+                {
+                    return BadRequest(new { success = false, message = "Mật khẩu mới không được trùng với mật khẩu hiện tại." });
+                }
+
+                // Validate new password
+                var passwordRegex = new System.Text.RegularExpressions.Regex(@"^(?=.*[A-Z])(?=.*\d).{6,8}$");
+                if (!passwordRegex.IsMatch(model.NewPassword))
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Mật khẩu mới phải từ 6-8 ký tự, chứa ít nhất một chữ cái in hoa và một số."
+                    });
+                }
+
+                // Confirm passwords match
+                if (model.NewPassword != model.ConfirmPassword)
+                {
+                    return BadRequest(new { success = false, message = "Xác nhận mật khẩu không khớp." });
+                }
+
+                user.PasswordHash = HashPassword(model.NewPassword);
+                _context.Update(user);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "Mật khẩu đã được cập nhật thành công." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error changing password for user");
+                return StatusCode(500, new { success = false, message = "Có lỗi xảy ra khi thay đổi mật khẩu." });
+            }
+        }
+
         private string GetFirstName(string fullName)
         {
             if (string.IsNullOrEmpty(fullName))
@@ -172,19 +271,24 @@ namespace WebBaoDienTu.Controllers
 
         private string HashPassword(string password)
         {
-            // Sử dụng SHA256 để băm mật khẩu (nên dùng BCrypt trong môi trường thực tế)
-            using (var sha256 = SHA256.Create())
-            {
-                var hashedBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-                return Convert.ToBase64String(hashedBytes);
-            }
+            return Convert.ToBase64String(
+                System.Security.Cryptography.SHA256.Create()
+                .ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)));
         }
+
 
         private bool VerifyPasswordHash(string password, string storedHash)
         {
             var hash = HashPassword(password);
             return hash == storedHash;
         }
+    }
+
+    public class ChangePasswordModel
+    {
+        public string CurrentPassword { get; set; } = string.Empty;
+        public string NewPassword { get; set; } = string.Empty;
+        public string ConfirmPassword { get; set; } = string.Empty;
     }
 
     public class LoginViewModel

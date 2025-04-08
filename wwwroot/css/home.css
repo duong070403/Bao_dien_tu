@@ -2,8 +2,12 @@
 
 /* Hiệu ứng cho container chính */
 .container {
-    animation: fadeIn 0.8s ease-in-out;
+    max-width: 1200px; /* Maintain container width */
+    margin: 0 auto;
+    padding-left: 60px !important;
+    padding-right: 60px !important;
 }
+
 
 @keyframes fadeIn {
     from {
@@ -116,6 +120,11 @@
 
 /* Hiệu ứng cho row */
 .news-row {
+    display: flex;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%; /* Take full width of parent container */
     animation: rowFade 1s ease-in-out;
 }
 
@@ -130,3 +139,170 @@
         transform: translateY(0);
     }
 }
+
+/* Row 1: 2 large news articles side by side */
+.row.news-row:first-of-type {
+    max-width: 100%; /* Full width of parent container */
+    margin: 0 auto;
+}
+
+/* Row 2+ with 3 articles, centered */
+.row.news-row:not(:first-of-type) {
+    max-width: 100%; /* Full width of parent container */
+    margin: 0 auto;
+}
+
+/* Enhanced responsive layout */
+@media (max-width: 992px) {
+    /* Reduce side spacing for tablets */
+    .container.mt-4 {
+        padding-left: calc(100% / 12);
+        padding-right: calc(100% / 12);
+    }
+
+    .col-md-6 {
+        padding: 0 10px;
+    }
+
+    .hot-title {
+        font-size: 1.75rem;
+        text-align: center;
+    }
+
+        .hot-title::after {
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+    /* For tablets - 2 articles per row */
+    .row.news-row:not(:first-of-type) .col-lg-4 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+/* For smaller tablets */
+@media (max-width: 768px) {
+    /* Further reduce side spacing for smaller tablets */
+    .container {
+        padding-left: 30px !important;
+        padding-right: 30px !important;
+    }
+
+    .col-md-6, .col-md-5, .col-lg-3 {
+        padding: 0 5px;
+    }
+
+    .large-news-image {
+        height: 220px;
+    }
+
+    .news-image {
+        height: 180px;
+    }
+
+    /* For tablets - maintain 2 articles per row */
+    .row.news-row:not(:first-of-type) .col-lg-4 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+/* For mobile devices */
+@media (max-width: 576px) {
+    /* Minimal side spacing for mobile */
+    .container {
+        padding-left: 15px !important;
+        padding-right: 15px !important;
+    }
+
+    /* For mobile - 1 article per row */
+    .row.news-row .col-md-6,
+    .row.news-row:not(:first-of-type) .col-lg-4 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .large-news-image,
+    .news-image {
+        height: 180px;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+    }
+
+    .card-text {
+        font-size: 0.9rem;
+    }
+}
+
+/* Fix button animation/scaling issues */
+.btn {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    transform-origin: center;
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+    .btn:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+    }
+
+/* Prevent excessive scaling on buttons */
+.btn-login:hover, .btn-register:hover, .btn-share:hover,
+.btn-primary:hover, .btn-danger:hover, .btn-success:hover,
+.btn-warning:hover, .btn-info:hover, .btn-secondary:hover,
+.btn-search:hover, .read-more:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Fix for read-more link scaling */
+.read-more:hover {
+    transform: translateX(5px) !important;
+    box-shadow: none !important;
+}
+
+/* Fix for button ripple effects */
+.btn::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.2) 10%, transparent 10.01%);
+    background-repeat: no-repeat;
+    background-position: 50%;
+    transform: scale(10, 10);
+    opacity: 0;
+    transition: transform 0.3s, opacity 0.5s;
+}
+
+.btn:active::after {
+    transform: scale(0, 0);
+    opacity: 0.3;
+    transition: 0s;
+}
+
+/* Override any 3D transforms that might cause issues */
+.btn-login, .btn-register, .btn-share, .btn-primary,
+.btn-danger, .btn-success, .btn-warning, .btn-info,
+.btn-secondary, .btn-search {
+    transform: none !important;
+    will-change: transform;
+    perspective: 1000px;
+}
+
+    .btn-login:hover, .btn-register:hover, .btn-share:hover,
+    .btn-primary:hover, .btn-danger:hover, .btn-success:hover,
+    .btn-warning:hover, .btn-info:hover, .btn-secondary:hover,
+    .btn-search:hover {
+        transform: translateY(-2px) !important;
+    }

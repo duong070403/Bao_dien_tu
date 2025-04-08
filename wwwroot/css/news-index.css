@@ -181,9 +181,16 @@
         box-shadow: 0 5px 12px rgba(0,0,0,0.15);
     }
 
-.btn-info {
-    background: linear-gradient(45deg, #3498db, #2980b9);
+/* Add to your CSS file to fix button animations */
+.btn-info, .btn-warning, .btn-danger, .btn-success {
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    transform-origin: center !important;
 }
+
+    .btn-info:hover, .btn-warning:hover, .btn-danger:hover, .btn-success:hover {
+        transform: scale(1.05) !important; /* Reduced from 1.15 or higher */
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+    }
 
 .btn-warning {
     background: linear-gradient(45deg, #f1c40f, #e67e22);

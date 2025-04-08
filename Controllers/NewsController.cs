@@ -25,15 +25,14 @@ namespace WebBaoDienTu.Controllers
 
         #region Public Views
         // GET: News
-        // GET: News
         public async Task<IActionResult> Index(
             string title,
             string author,
             DateTime? date,
-            int? categoryId, // Add this parameter to accept category filtering
-            string approvalStatus, // Add this parameter to handle approval status filtering
-            DateTime? startDate, // Add this for date range filtering
-            DateTime? endDate) // Add this for date range filtering
+            int? categoryId, 
+            string approvalStatus, 
+            DateTime? startDate, 
+            DateTime? endDate) 
         {
             try
             {
@@ -57,19 +56,15 @@ namespace WebBaoDienTu.Controllers
                 if (!string.IsNullOrEmpty(title))
                     query = query.Where(n => n.Title.Contains(title));
 
-                // Apply author filter
                 if (!string.IsNullOrEmpty(author))
                     query = query.Where(n => n.Author.FullName.Contains(author));
 
-                // Apply simple date filter
                 if (date.HasValue)
                     query = query.Where(n => n.CreatedAt.Date == date.Value.Date);
 
-                // Apply category filter
                 if (categoryId.HasValue && categoryId > 0)
                     query = query.Where(n => n.CategoryId == categoryId.Value);
 
-                // Apply approval status filter
                 if (!string.IsNullOrEmpty(approvalStatus))
                 {
                     if (approvalStatus == "approved")
@@ -78,10 +73,9 @@ namespace WebBaoDienTu.Controllers
                         query = query.Where(n => !n.IsApproved);
                 }
 
-                // Apply date range filter
                 if (startDate.HasValue && endDate.HasValue)
                 {
-                    var endDateAdjusted = endDate.Value.AddDays(1).AddSeconds(-1); // End of the selected day
+                    var endDateAdjusted = endDate.Value.AddDays(1).AddSeconds(-1); 
                     query = query.Where(n => n.CreatedAt >= startDate.Value && n.CreatedAt <= endDateAdjusted);
                 }
 
@@ -105,7 +99,7 @@ namespace WebBaoDienTu.Controllers
             {
                 _logger.LogError(ex, "Error in Index action");
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách tin tức.";
-                return View("List", new List<News>()); // Change "Index" to "List"
+                return View("List", new List<News>());
             }
         }
 
@@ -186,6 +180,7 @@ namespace WebBaoDienTu.Controllers
         public IActionResult Create()
         {
             ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryName");
+            ViewBag.HideNavElements = true;
             return View();
         }
 
@@ -350,38 +345,50 @@ namespace WebBaoDienTu.Controllers
             }
         }
 
-        // GET: News/Edit/5
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int? id)
+        // GET: News/UserEdit/5
+        [Authorize(Roles = "User")]
+        public async Task<IActionResult> UserEdit(int? id)
         {
             try
             {
                 if (id == null)
                     return NotFound();
 
-                var news = await _context.News.FindAsync(id);
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId) || !int.TryParse(userId, out int authorId))
+                    return RedirectToAction("Login", "Account");
+
+                var news = await _context.News
+                    .FirstOrDefaultAsync(n => n.NewsId == id && n.AuthorId == authorId
+                                       && !n.IsApproved && !n.IsArchived);
+
                 if (news == null)
-                    return NotFound();
+                {
+                    TempData["ErrorMessage"] = "Bạn chỉ có thể chỉnh sửa tin đang chờ duyệt.";
+                    return RedirectToAction(nameof(MyNews));
+                }
 
                 ViewData["IsEdit"] = true;
+                ViewBag.HideNavElements = true;
                 ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryName", news.CategoryId);
                 return View("Create", news);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in Edit GET action for ID: {Id}", id);
+                _logger.LogError(ex, "Error in UserEdit GET action for ID: {Id}", id);
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải trang chỉnh sửa tin tức.";
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(MyNews));
             }
         }
 
+
         #endregion
         #region Form Submissions
-
-        [Authorize(Roles = "Admin")]
+        // POST: News/UserEdit/5
+        [Authorize(Roles = "User")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("NewsId,Title,Content,ImageUrl,AuthorId,CategoryId,IsApproved,CreatedAt,IsDeleted,IsArchived")] News news, IFormFile? ImageFile)
+        public async Task<IActionResult> UserEdit(int id, [Bind("NewsId,Title,Content,ImageUrl,AuthorId,CategoryId,IsApproved,CreatedAt,IsDeleted,IsArchived")] News news, IFormFile? ImageFile)
         {
             try
             {
@@ -391,15 +398,25 @@ namespace WebBaoDienTu.Controllers
                 _logger.LogInformation("Received data: NewsId={NewsId}, Title='{Title}', AuthorId={AuthorId}, CategoryId={CategoryId}",
                     news.NewsId, news.Title, news.AuthorId, news.CategoryId);
 
+                // Verify that this news belongs to the current user and is pending approval
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId) || !int.TryParse(userId, out int authorId))
+                    return RedirectToAction("Login", "Account");
+
+                var existingNews = await _context.News.AsNoTracking()
+                    .FirstOrDefaultAsync(n => n.NewsId == id && n.AuthorId == authorId
+                                        && !n.IsApproved && !n.IsArchived);
+
+                if (existingNews == null)
+                {
+                    return Json(new { success = false, message = "Bạn chỉ có thể chỉnh sửa tin đang chờ duyệt." });
+                }
+
                 ViewData["IsEdit"] = true;
                 ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryName", news.CategoryId);
 
                 if (!string.IsNullOrEmpty(news.Title) && !string.IsNullOrEmpty(news.Content) && news.CategoryId > 0)
                 {
-                    var existingNews = await _context.News.AsNoTracking().FirstOrDefaultAsync(n => n.NewsId == id);
-                    if (existingNews == null)
-                        return NotFound();
-
                     string? originalImageUrl = existingNews.ImageUrl;
 
                     // Handle image file upload
@@ -416,7 +433,7 @@ namespace WebBaoDienTu.Controllers
                             return View("Create", news);
                         }
                     }
-                    // Handle image URL - only if it's different from the original
+
                     else if (!string.IsNullOrEmpty(news.ImageUrl) && news.ImageUrl != originalImageUrl)
                     {
                         string? downloadedImageUrl = await DownloadAndSaveImageFromUrl(news.ImageUrl);
@@ -436,12 +453,19 @@ namespace WebBaoDienTu.Controllers
                         news.ImageUrl = originalImageUrl;
                     }
 
+
+                    news.AuthorId = authorId;
+                    news.IsApproved = false; 
+                    news.IsArchived = false;
+                    news.IsDeleted = false;
+                    news.CreatedAt = existingNews.CreatedAt; 
+
                     try
                     {
                         _context.Update(news);
                         await _context.SaveChangesAsync();
 
-                        return Json(new { success = true, message = "Tin tức đã được cập nhật thành công!", redirectUrl = Url.Action(nameof(Index)) });
+                        return Json(new { success = true, message = "Tin tức đã được cập nhật thành công!", redirectUrl = Url.Action(nameof(MyNews)) });
                     }
                     catch (DbUpdateConcurrencyException)
                     {
@@ -468,7 +492,7 @@ namespace WebBaoDienTu.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in Edit POST action for ID: {Id}", id);
+                _logger.LogError(ex, "Error in UserEdit POST action for ID: {Id}", id);
                 return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật tin tức." });
             }
         }
@@ -605,7 +629,6 @@ namespace WebBaoDienTu.Controllers
 
 
         // POST: News/Archive/5
-        // POST: News/Archive/5
         [Authorize(Roles = "User")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -616,10 +639,7 @@ namespace WebBaoDienTu.Controllers
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (string.IsNullOrEmpty(userId) || !int.TryParse(userId, out int authorId))
                 {
-                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                        return Json(new { success = false, message = "Vui lòng đăng nhập lại." });
-
-                    return RedirectToAction("Login", "Account");
+                    return Json(new { success = false, message = "Vui lòng đăng nhập lại." });
                 }
 
                 var newsItem = await _context.News.FirstOrDefaultAsync(n => n.NewsId == id && n.AuthorId == authorId);
@@ -628,35 +648,19 @@ namespace WebBaoDienTu.Controllers
                     newsItem.IsArchived = true;
                     _context.Update(newsItem);
                     await _context.SaveChangesAsync();
-                    _logger.LogInformation("News archived, ID: {NewsId}", newsItem.NewsId);
-
-                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                        return Json(new { success = true, message = "Tin tức đã được lưu trữ thành công." });
-
-                    TempData["SuccessMessage"] = "Tin tức đã được lưu trữ.";
+                    return Json(new { success = true, message = "Tin tức đã được lưu trữ thành công." });
                 }
                 else
                 {
-                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                        return Json(new { success = false, message = "Không thể lưu trữ tin tức này." });
-
-                    TempData["ErrorMessage"] = "Không thể lưu trữ tin tức này.";
+                    return Json(new { success = false, message = "Không thể lưu trữ tin tức này." });
                 }
-
-                return RedirectToAction("MyNews");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in Archive action for ID: {Id}", id);
-
-                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                    return Json(new { success = false, message = "Có lỗi xảy ra khi lưu trữ tin tức." });
-
-                TempData["ErrorMessage"] = "Có lỗi xảy ra khi lưu trữ tin tức.";
-                return RedirectToAction("MyNews");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi lưu trữ tin tức." });
             }
         }
-
 
         // POST: News/Repost/5
         [Authorize(Roles = "User")]

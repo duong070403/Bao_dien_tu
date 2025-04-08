@@ -265,3 +265,166 @@ $(function () {
     setInterval(loadNotifications, 30000);
   }
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Get current URL path
+    const path = window.location.pathname;
+    const categoryId = getCategoryIdFromPath(path);
+
+    // Find all category navigation links
+    const categoryLinks = document.querySelectorAll('.navbar-nav .nav-link');
+
+    // Remove any existing active classes
+    categoryLinks.forEach(link => {
+        link.classList.remove('active');
+    });
+
+    // Add active class to current category
+    if (categoryId) {
+        const activeLink = document.querySelector(`.nav-link[href*="Category/${categoryId}"]`);
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+    }
+
+    // Handle Home page
+    if (path === '/' || path.toLowerCase() === '/home' || path.toLowerCase() === '/home/index') {
+        const homeLink = document.querySelector('.navbar-brand');
+        if (homeLink) {
+            homeLink.classList.add('active-home');
+        }
+    }
+});
+
+// Extract category ID from URL
+function getCategoryIdFromPath(path) {
+    if (path.includes('/Home/Category/')) {
+        const parts = path.split('/');
+        return parts[parts.length - 1];
+    }
+    return null;
+}
+
+// Handle Change Password
+$("#changePasswordForm").on('submit', function (e) {
+    e.preventDefault();
+    $("#passwordErrorMessage").hide();
+    $(this).find('button[type="submit"]').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...');
+    $(this).find('button[type="submit"]').prop('disabled', true);
+
+    var currentPassword = $("#currentPassword").val();
+    var newPassword = $("#newPassword").val();
+    var confirmPassword = $("#confirmNewPassword").val();
+
+    // Validate new password format
+    var passwordRegex = /^(?=.*[A-Z])(?=.*\d).{6,8}$/;
+    if (!passwordRegex.test(newPassword)) {
+        $("#passwordErrorMessage").text("Mật khẩu phải từ 6-8 ký tự, chứa ít nhất một chữ cái in hoa và một số.").show();
+        $(this).find('button[type="submit"]').html('<i class="fas fa-save me-2"></i> Cập nhật mật khẩu');
+        $(this).find('button[type="submit"]').prop('disabled', false);
+        return;
+    }
+
+    // Check if passwords match
+    if (newPassword !== confirmPassword) {
+        $("#passwordErrorMessage").text("Xác nhận mật khẩu không khớp.").show();
+        $(this).find('button[type="submit"]').html('<i class="fas fa-save me-2"></i> Cập nhật mật khẩu');
+        $(this).find('button[type="submit"]').prop('disabled', false);
+        return;
+    }
+
+    var formData = new FormData();
+    formData.append('CurrentPassword', currentPassword);
+    formData.append('NewPassword', newPassword);
+    formData.append('ConfirmPassword', confirmPassword);
+
+    $.ajax({
+        type: "POST",
+        url: "/api/Auth/changePassword",
+        data: formData,
+        processData: false,
+        contentType: false,
+        cache: false,
+        headers: {
+            "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+        },
+        success: function (response) {
+            if (response.success) {
+                // Reset form
+                $("#changePasswordForm")[0].reset();
+                // Hide change password modal
+                $('#changePasswordModal').modal('hide');
+                // Show success message
+                $('#successMessage').text(response.message);
+                $('#successModal').modal('show');
+            } else {
+                $("#passwordErrorMessage").text(response.message).show();
+                $("#changePasswordForm").find('button[type="submit"]').html('<i class="fas fa-save me-2"></i> Cập nhật mật khẩu');
+                $("#changePasswordForm").find('button[type="submit"]').prop('disabled', false);
+            }
+        },
+        error: function (xhr) {
+            var errorMsg = xhr.responseJSON?.message || "Có lỗi xảy ra. Vui lòng thử lại sau.";
+            $("#passwordErrorMessage").text(errorMsg).show();
+            $("#changePasswordForm").find('button[type="submit"]').html('<i class="fas fa-save me-2"></i> Cập nhật mật khẩu');
+            $("#changePasswordForm").find('button[type="submit"]').prop('disabled', false);
+        }
+    });
+});
+
+// Add this to the layout.js file to handle animated icons in modals
+
+// Function to add animated icons to modals
+function setupAnimatedModalTitles() {
+    // Add the animated class to all modal titles with icons
+    document.querySelectorAll('.modal-title i').forEach(icon => {
+        icon.classList.add('icon-animated');
+    });
+
+    // Add specific animation to active modals
+    $('.modal').on('show.bs.modal', function () {
+        $(this).find('.modal-title').addClass('modal-title-animated');
+    });
+
+    $('.modal').on('hide.bs.modal', function () {
+        $(this).find('.modal-title').removeClass('modal-title-animated');
+    });
+}
+
+// Call this function on document ready
+$(function () {
+    // Existing code...
+
+    // Setup animated modal titles
+    setupAnimatedModalTitles();
+});
+
+// Update the Change Password handler to include animation
+$("#changePasswordForm").on('submit', function (e) {
+    e.preventDefault();
+    $("#passwordErrorMessage").hide();
+
+    // Add animation to the modal title icon
+    $('#changePasswordModalLabel i').addClass('icon-spin');
+
+    $(this).find('button[type="submit"]').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...');
+    $(this).find('button[type="submit"]').prop('disabled', true);
+
+    // Rest of your code...
+
+    $.ajax({
+        // Existing AJAX call...
+        success: function (response) {
+            // Remove icon animation
+            $('#changePasswordModalLabel i').removeClass('icon-spin');
+
+            // Rest of your success handler...
+        },
+        error: function (xhr) {
+            // Remove icon animation
+            $('#changePasswordModalLabel i').removeClass('icon-spin');
+
+            // Rest of your error handler...
+        }
+    });
+});

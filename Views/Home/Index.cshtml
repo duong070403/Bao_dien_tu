@@ -10,11 +10,11 @@
 <!-- Google Font -->
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-<link href="~/css/home.css" rel="stylesheet">
+<link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
 
 <div class="container mt-4">
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-12 text-center">
             @if (isHomePage)
             {
                 <h1 class="fw-bold hot-title">Tin hot nhất hôm nay</h1>
@@ -30,7 +30,7 @@
     <div class="row news-row">
         @foreach (var news in Model.ToList().Take(2))
         {
-            <div class="col-md-6 col-lg-6 mb-4">
+            <div class="col-md-6 col-sm-12 mb-4">
                 <div class="card h-100">
                     <a href="@Url.Action("Read", "News", new { id = news.NewsId })">
                         <img src="@news.ImageUrl" class="card-img-top news-image large-news-image" alt="@news.Title">
@@ -61,7 +61,7 @@
             <div class="row news-row">
                 @foreach (var news in newsInRow)
                 {
-                    <div class="col-md-5 col-lg-3 mb-4">
+                    <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
                         <div class="card h-100">
                             <a href="@Url.Action("Read", "News", new { id = news.NewsId })">
                                 <img src="@news.ImageUrl" class="card-img-top news-image" alt="@news.Title">

@@ -1,4 +1,4 @@
-﻿// wwwroot/js/hover-dropdowns.js - Enhance dropdowns to activate on hover
+﻿// wwwroot/js/hover-dropdowns.js - Enhanced for better dropdown behavior
 
 $(function () {
     // Add additional animations when page loads
@@ -6,13 +6,13 @@ $(function () {
         $('.navbar-brand img').addClass('animate__animated animate__pulse');
     }, 1500);
 
-    // Remove Bootstrap's data attributes for click trigger on dropdowns
-    $('.dropdown-toggle').each(function () {
-        $(this).attr('data-bs-toggle', '');
-        $(this).attr('aria-expanded', 'false');
+    // Ensure all dropdowns work with hover
+    $('.dropdown').each(function () {
+        // Remove Bootstrap's click-only behavior
+        $(this).find('.dropdown-toggle').removeAttr('data-bs-toggle');
     });
 
-    // Add custom hover behavior
+    // Add custom hover behavior for all dropdowns
     $('.dropdown').on('mouseenter', function () {
         const $dropdown = $(this);
         const $menu = $dropdown.find('.dropdown-menu');
@@ -59,21 +59,16 @@ $(function () {
         }
     });
 
-
-    // Make navbar slightly smaller on scroll
+    // Fixed navbar behavior - no height changes on scroll
     $(window).on('scroll', function () {
         if ($(this).scrollTop() > 100) {
             $('.navbar').css({
-                'padding': '0.8rem 0',
                 'box-shadow': '0 5px 15px rgba(0,0,0,0.1)'
             });
-            $('.navbar-brand img').css('height', '45px');
         } else {
             $('.navbar').css({
-                'padding': '1.2rem 0',
                 'box-shadow': '0 2px 5px rgba(0,0,0,0.05)'
             });
-            $('.navbar-brand img').css('height', '50px');
         }
     });
 });

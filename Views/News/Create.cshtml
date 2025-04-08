@@ -17,7 +17,7 @@
                     <h3><i class="@(isEdit ? "fas fa-edit" : "fas fa-newspaper") me-2"></i> @ViewData["Title"]</h3>
                 </div>
                 <div class="card-body">
-                    <form id="newsForm" asp-action="@(isEdit ? "Edit" : "Create")" method="post" enctype="multipart/form-data">
+                    <form id="newsForm" asp-action="@(isEdit ? (User.IsInRole("Admin") ? "Edit" : "UserEdit") : "Create")" method="post" enctype="multipart/form-data">
                         @Html.AntiForgeryToken()
 
                         @if (isEdit)
@@ -137,9 +137,16 @@
             }
         };
 
-                $('#newsForm').submit(function (e) {
+                       $('#newsForm').submit(function (e) {
             e.preventDefault();
             var formData = new FormData(this);
+
+            // Add loading state to button
+            var submitButton = $(this).find('button[type="submit"]');
+            var originalButtonText = submitButton.html();
+            submitButton.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...');
+            submitButton.prop('disabled', true);
+
             $.ajax({
                 type: 'POST',
                 url: $(this).attr('action'),
@@ -155,20 +162,29 @@
                     } else {
                         // Handle server validation errors
                         showToast(response.message || 'Có lỗi xảy ra khi xử lý.', 'danger');
+                        submitButton.html(originalButtonText);
+                        submitButton.prop('disabled', false);
                     }
                 },
                 error: function (xhr) {
+                    // Reset button state
+                    submitButton.html(originalButtonText);
+                    submitButton.prop('disabled', false);
+
+                    console.error('Error response:', xhr);
+
                     // Check if we have validation errors
                     if (xhr.status === 400 && xhr.responseJSON) {
                         // Display validation errors
                         showToast('Vui lòng sửa các lỗi và thử lại.', 'danger');
                         // You can update the form to show specific errors if needed
                     } else {
-                        showToast('Có lỗi xảy ra: ' + (xhr.responseJSON?.message || xhr.statusText), 'danger');
+                        showToast('Có lỗi xảy ra: ' + (xhr.responseJSON?.message || xhr.statusText || 'Không xác định'), 'danger');
                     }
                 }
             });
         });
+
 
 
         function showToast(message, type) {
