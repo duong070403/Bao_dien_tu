@@ -1,5 +1,4 @@
-﻿@* Updated MyNews.cshtml file with edit for pending and delete for archived news *@
-@model IEnumerable<WebBaoDienTu.Models.News>
+﻿@model IEnumerable<WebBaoDienTu.Models.News>
 
 @{
     ViewData["Title"] = "Lịch sử tin tức của tôi";
@@ -90,7 +89,7 @@
                                 }
                                 @if (!item.IsApproved && !item.IsArchived && !isExpired)
                                 {
-                                    <a href="@Url.Action("UserEdit", "News", new { id = item.NewsId })" class="btn btn-primary">
+                                    <a href="@Url.Action("Edit", "UserNews", new { id = item.NewsId })" class="btn btn-primary">
                                         <i class="fas fa-edit"></i> Sửa
                                     </a>
                                     <button type="button" class="btn btn-warning" onclick="showCancelModal(@item.NewsId)">
@@ -118,7 +117,7 @@
                 <i class="far fa-newspaper"></i>
                 <h3>Chưa có tin tức nào</h3>
                 <p>Bạn chưa đăng tin tức nào. Hãy bắt đầu chia sẻ tin tức đầu tiên của mình!</p>
-                <a href="@Url.Action("Create", "News")" class="btn btn-primary">
+                <a href="@Url.Action("Create", "UserNews")" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Đăng tin mới
                 </a>
             </div>
@@ -181,7 +180,7 @@
                                     }
                                     @if (!item.IsApproved && !item.IsArchived && !isExpired)
                                     {
-                                        <a href="@Url.Action("UserEdit", "News", new { id = item.NewsId })" class="btn btn-primary btn-sm">
+                                        <a href="@Url.Action("Edit", "UserNews", new { id = item.NewsId })" class="btn btn-primary btn-sm">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <button type="button" class="btn btn-warning btn-sm" onclick="showCancelModal(@item.NewsId)">
@@ -205,43 +204,30 @@
             </table>
         </div>
     </div>
-
-    @if (Model.Count() > 12)
-    {
-        <div class="pagination-container">
-            <ul class="pagination">
-                <li class="pagination-item"><a href="#" class="pagination-link"><i class="fas fa-chevron-left"></i></a></li>
-                <li class="pagination-item"><a href="#" class="pagination-link active">1</a></li>
-                <li class="pagination-item"><a href="#" class="pagination-link">2</a></li>
-                <li class="pagination-item"><a href="#" class="pagination-link">3</a></li>
-                <li class="pagination-item"><a href="#" class="pagination-link"><i class="fas fa-chevron-right"></i></a></li>
-            </ul>
-        </div>
-    }
 </div>
 
 <!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content animate-modal">
-            <div class="modal-header modal-header-delete">
-                <h5 class="modal-title" id="deleteModalLabel">
-                    <i class="fas fa-trash-alt me-2 icon-spin"></i> Xác nhận xóa
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel"><i class="fas fa-trash me-2"></i> Xác nhận xóa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <h3 class="fw-bold text-center" id="newsTitle"></h3>
-                <p class="text-muted text-center" id="newsDetails"></p>
+                <h4 id="newsTitle" class="text-center mb-3"></h4>
+                <p id="newsDetails" class="text-center text-muted"></p>
                 <div id="newsImageContainer" class="text-center mb-3"></div>
-                <div class="alert alert-danger fw-bold text-center animate-alert">
-                    <i class="fas fa-exclamation-triangle me-2"></i> Bạn có chắc chắn muốn xóa bài viết này? Hành động này không thể hoàn tác!
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i> Bạn có chắc chắn muốn xóa tin tức này? Hành động này không thể hoàn tác.
                 </div>
-                <input type="hidden" id="deleteNewsId" />
+                <input type="hidden" id="deleteNewsId" value="" />
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-danger btn-hover-effect" id="confirmDeleteButton">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Hủy
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteButton">
                     <i class="fas fa-trash me-1"></i> Xóa
                 </button>
             </div>
@@ -249,55 +235,50 @@
     </div>
 </div>
 
-<!-- Update the Cancel Confirmation Modal in MyNews.cshtml -->
+<!-- Cancel Confirmation Modal -->
 <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content animate-modal">
-            <div class="modal-header modal-header-archive text-white">
-                <h5 class="modal-title" id="cancelModalLabel">
-                    <i class="fas fa-archive me-2"></i> Xác nhận lưu trữ
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title" id="cancelModalLabel"><i class="fas fa-archive me-2"></i> Lưu trữ tin tức</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <h3 class="fw-bold text-center" id="cancelNewsTitle"></h3>
-                <p class="text-muted text-center" id="cancelNewsDetails"></p>
+                <h4 id="cancelNewsTitle" class="text-center mb-3"></h4>
+                <p id="cancelNewsDetails" class="text-center text-muted"></p>
                 <div id="cancelNewsImageContainer" class="text-center mb-3"></div>
-                <div class="alert alert-warning text-center animate-alert">
-                    <p><i class="fas fa-info-circle me-2"></i> Bạn có chắc chắn muốn hủy bài viết này? Bài viết sẽ được chuyển vào mục lưu trữ.</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle"></i> Tin tức sẽ được chuyển vào mục lưu trữ. Bạn có muốn tiếp tục?
                 </div>
-                <input type="hidden" id="cancelNewsId" />
+                <input type="hidden" id="cancelNewsId" value="" />
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="fas fa-times me-1"></i> Đóng
                 </button>
-                <button type="button" class="btn btn-warning btn-hover-effect" id="confirmCancelButton">
-                    <i class="fas fa-archive me-1"></i> Xác nhận lưu trữ
+                <button type="button" class="btn btn-warning" id="confirmCancelButton">
+                    <i class="fas fa-archive me-1"></i> Lưu trữ
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-
 <!-- Archived News Details Modal -->
 <div class="modal fade" id="archivedNewsModal" tabindex="-1" aria-labelledby="archivedNewsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content animate-modal">
-            <div class="modal-header modal-header-archive text-white" id="archivedNewsHeader">
-                <h5 class="modal-title" id="archivedNewsModalLabel">
-                    <i class="fas fa-file-alt me-2"></i> Chi tiết tin tức
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" id="archivedNewsHeader">
+                <h5 class="modal-title" id="archivedNewsModalLabel"><i class="fas fa-archive me-2"></i> Chi tiết tin lưu trữ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <h2 class="text-center mb-4" id="archivedNewsTitle"></h2>
-                <div class="text-center mb-3">
+                <h3 class="mb-3 text-center" id="archivedNewsTitle"></h3>
+                <div class="mb-3 text-center text-muted">
                     <span class="badge bg-secondary me-2" id="archivedNewsCategory"></span>
                 </div>
-                <div id="archivedNewsImageContainer" class="text-center mb-4"></div>
-                <div class="content" id="archivedNewsContent"></div>
+                <div class="text-center mb-4" id="archivedNewsImageContainer"></div>
+                <div class="archived-news-content" id="archivedNewsContent"></div>
             </div>
             <div class="modal-footer" id="archivedNewsFooter">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -310,26 +291,24 @@
 
 <!-- Repost Confirmation Modal -->
 <div class="modal fade" id="repostModal" tabindex="-1" aria-labelledby="repostModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content animate-modal">
-            <div class="modal-header modal-header-repost text-white">
-                <h5 class="modal-title" id="repostModalLabel">
-                    <i class="fas fa-redo me-2"></i> Xác nhận đăng lại
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="repostModalLabel"><i class="fas fa-redo me-2"></i> Đăng lại tin tức</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <h3 class="fw-bold text-center" id="repostNewsTitle"></h3>
-                <div class="alert alert-info text-center animate-alert">
-                    <p>Bạn có chắc chắn muốn đăng lại bài viết này? Bài viết sẽ được chuyển về trạng thái chờ duyệt.</p>
+                <h4 id="repostNewsTitle" class="text-center mb-3"></h4>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> Tin tức sẽ được đăng lại và chuyển sang trạng thái chờ duyệt. Bạn có muốn tiếp tục?
                 </div>
-                <input type="hidden" id="repostNewsId" />
+                <input type="hidden" id="repostNewsId" value="" />
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="fas fa-times me-1"></i> Hủy
                 </button>
-                <button type="button" class="btn btn-primary btn-hover-effect" id="confirmRepostButton">
+                <button type="button" class="btn btn-info" id="confirmRepostButton">
                     <i class="fas fa-redo me-1"></i> Đăng lại
                 </button>
             </div>

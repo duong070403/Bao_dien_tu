@@ -2,7 +2,7 @@
 
 function showDetailsModal(newsId) {
     $.ajax({
-        url: '/News/GetNewsDetails/' + newsId,
+        url: '/AdminNews/GetNewsDetails/' + newsId,  // Changed from News to AdminNews
         type: 'GET',
         success: function (result) {
             if (result.success) {
@@ -103,12 +103,9 @@ function showApproveModalFromDetails(newsId) {
 // Corrected deleteNews function
 function deleteNews() {
     var newsId = $('#deleteNewsId').val();
-
-    // Get the token
     var token = document.querySelector('input[name="__RequestVerificationToken"]').value;
 
-    // Send the delete request with proper headers
-    fetch('/News/Delete/' + newsId, {
+    fetch('/AdminNews/Delete/' + newsId, {
         method: 'POST',
         headers: {
             'RequestVerificationToken': token,
@@ -154,7 +151,7 @@ function deleteNews() {
 
 function showDeleteModal(newsId) {
     $.ajax({
-        url: '/News/GetNewsDetailsForDelete/' + newsId,
+        url: '/AdminNews/GetNewsDetailsForDelete/' + newsId,  // Changed from News to AdminNews
         type: 'GET',
         success: function (result) {
             $('#newsTitle').text(result.title);
@@ -177,7 +174,7 @@ function showDeleteModal(newsId) {
 
 function showApproveModal(newsId) {
     $.ajax({
-        url: '/News/GetNewsDetailsForDelete/' + newsId,
+        url: '/AdminNews/GetNewsDetailsForDelete/' + newsId,  // Changed from News to AdminNews
         type: 'GET',
         success: function (result) {
             // Cập nhật UI với thông tin phong phú hơn
@@ -211,7 +208,7 @@ function approveNews() {
     var newsId = $('#approveNewsId').val();
     var token = document.querySelector('input[name="__RequestVerificationToken"]').value;
 
-    fetch('/News/Approve/' + newsId, {
+    fetch('/AdminNews/Approve/' + newsId, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',

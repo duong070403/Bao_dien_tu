@@ -5,6 +5,9 @@ using WebBaoDienTu.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Register HttpClient Factory - Add this line
+builder.Services.AddHttpClient();
+
 builder.Services.AddSingleton(provider => {
     var smtpServer = builder.Configuration["EmailSettings:SmtpServer"]
         ?? throw new InvalidOperationException("SMTP Server configuration is missing");
@@ -25,6 +28,9 @@ builder.Services.AddSingleton(provider => {
 
 builder.Services.AddDbContext<BaoDienTuContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Make sure NotificationService is properly registered
+builder.Services.AddScoped<NotificationService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -57,6 +63,16 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Add API endpoint routing before the default route
+// Update the existing API route configuration
+app.MapControllerRoute(
+    name: "api",
+    pattern: "api/{controller}/{action}/{id?}");
+
+// Consider adding a more RESTful routing pattern for API controllers
+app.MapControllers();
+
 
 app.MapControllerRoute(
     name: "default",
