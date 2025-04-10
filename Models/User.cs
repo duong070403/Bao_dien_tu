@@ -11,7 +11,8 @@ public partial class User
         public string PasswordHash { get; set; } = null!;
         public string Role { get; set; } = null!;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public bool IsDeleted { get; set; } = false; // Add this field
 
-        public virtual ICollection<News> News { get; set; } = new List<News>();
+    public virtual ICollection<News> News { get; set; } = new List<News>();
         public virtual ICollection<NewsSharing> NewsSharings { get; set; } = new List<NewsSharing>();
 }

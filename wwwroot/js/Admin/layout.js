@@ -428,3 +428,70 @@ $("#changePasswordForm").on('submit', function (e) {
         }
     });
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Handle footer subscription form
+    const footerSubscriptionForm = document.getElementById('footerSubscriptionForm');
+    if (footerSubscriptionForm) {
+        footerSubscriptionForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const email = document.getElementById('footerEmail').value.trim();
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            const subscribeBtn = footerSubscriptionForm.querySelector('.btn-subscribe');
+            const originalBtnHtml = subscribeBtn.innerHTML;
+
+            // Show loading state
+            subscribeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            subscribeBtn.disabled = true;
+
+            // Submit the form via AJAX
+            fetch('/News/Subscribe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'RequestVerificationToken': token
+                },
+                body: `email=${encodeURIComponent(email)}&__RequestVerificationToken=${encodeURIComponent(token)}`
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Reset button state
+                    subscribeBtn.innerHTML = originalBtnHtml;
+                    subscribeBtn.disabled = false;
+
+                    // Show result
+                    const resultDiv = document.getElementById('subscriptionResult');
+                    resultDiv.style.display = 'block';
+
+                    if (data.success) {
+                        resultDiv.className = 'mt-2 text-success';
+                        resultDiv.innerHTML = `<small><i class="fas fa-check-circle me-1"></i>${data.message}</small>`;
+                        footerSubscriptionForm.reset();
+                    } else {
+                        resultDiv.className = 'mt-2 text-warning';
+                        resultDiv.innerHTML = `<small><i class="fas fa-exclamation-triangle me-1"></i>${data.message}</small>`;
+                    }
+
+                    // Hide result after 5 seconds
+                    setTimeout(() => {
+                        resultDiv.style.display = 'none';
+                    }, 5000);
+                })
+                .catch(error => {
+                    // Reset button state
+                    subscribeBtn.innerHTML = originalBtnHtml;
+                    subscribeBtn.disabled = false;
+
+                    // Show error
+                    const resultDiv = document.getElementById('subscriptionResult');
+                    resultDiv.style.display = 'block';
+                    resultDiv.className = 'mt-2 text-warning';
+                    resultDiv.innerHTML = '<small><i class="fas fa-exclamation-triangle me-1"></i>Có lỗi xảy ra. Vui lòng thử lại sau.</small>';
+
+                    console.error('Subscription error:', error);
+                });
+        });
+    }
+});

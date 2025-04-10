@@ -12,6 +12,8 @@ namespace WebBaoDienTu.Services
         private readonly string _senderEmail;
         private readonly string _senderPassword;
 
+
+
         public EmailService(string smtpServer, int smtpPort, string senderEmail, string senderPassword)
         {
             _smtpServer = smtpServer ?? throw new ArgumentNullException(nameof(smtpServer));

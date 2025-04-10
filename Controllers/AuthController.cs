@@ -35,10 +35,11 @@ namespace WebBaoDienTu.Controllers
                     return BadRequest(new { success = false, message = "Dữ liệu không hợp lệ." });
 
                 var user = await _context.Users
-                    .FirstOrDefaultAsync(u => u.Email == model.Email);
+    .FirstOrDefaultAsync(u => u.Email == model.Email);
 
-                if (user == null || !VerifyPasswordHash(model.Password, user.PasswordHash))
-                    return BadRequest(new { success = false, message = "Email hoặc mật khẩu không đúng." });
+                if (user == null || !VerifyPasswordHash(model.Password, user.PasswordHash) || user.IsDeleted)
+                    return BadRequest(new { success = false, message = "Email hoặc mật khẩu không đúng hoặc tài khoản đã bị xóa." });
+
 
                 await SignInUserAsync(user, model.RememberMe);
 

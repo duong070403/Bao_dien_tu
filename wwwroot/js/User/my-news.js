@@ -96,7 +96,7 @@ function setupConfirmHandlers() {
             const id = document.getElementById('deleteNewsId').value;
             const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
 
-            fetch('/News/DeleteConfirmed/' + id, {
+            fetch('/UserNews/DeleteConfirmed/' + id, { // Updated from News to UserNews
                 method: 'POST',
                 headers: {
                     'RequestVerificationToken': token,
@@ -123,7 +123,7 @@ function setupConfirmHandlers() {
             const id = document.getElementById('cancelNewsId').value;
             const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
 
-            fetch('/News/Archive', {
+            fetch('/UserNews/Archive', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -153,7 +153,6 @@ function setupConfirmHandlers() {
         };
     }
 
-
     // Set up confirm button for repost
     const confirmRepostButton = document.getElementById('confirmRepostButton');
     if (confirmRepostButton) {
@@ -161,7 +160,7 @@ function setupConfirmHandlers() {
             const id = document.getElementById('repostNewsId').value;
             const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
 
-            fetch('/News/Repost/' + id, {
+            fetch('/UserNews/Repost/' + id, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -194,8 +193,13 @@ function setupConfirmHandlers() {
 
 // Function to show delete confirmation modal
 function showDeleteModal(newsId) {
-    fetch('/News/GetNewsDetailsForDelete/' + newsId)
-        .then(response => response.json())
+    fetch('/UserNews/GetNewsDetailsForDelete/' + newsId)  // Make sure this endpoint exists in UserNewsController
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
             document.getElementById('newsTitle').textContent = data.title;
             document.getElementById('newsDetails').textContent = '🕒 ' + data.createdAt + ' | 🖊️ Tác giả: ' + data.authorFullName;
@@ -212,13 +216,22 @@ function showDeleteModal(newsId) {
 
             new bootstrap.Modal(document.getElementById('deleteModal')).show();
         })
-        .catch(error => showToast('Không thể tải chi tiết tin tức: ' + error, 'danger'));
+        .catch(error => {
+            console.error('Error fetching news details:', error);
+            showToast('Không thể tải chi tiết tin tức: ' + error, 'danger');
+        });
 }
 
 // Function to show cancel confirmation modal
+// Function to show cancel confirmation modal
 function showCancelModal(newsId) {
-    fetch('/News/GetNewsDetailsForDelete/' + newsId)
-        .then(response => response.json())
+    fetch('/UserNews/GetNewsDetailsForDelete/' + newsId)  // Make sure this endpoint exists in UserNewsController
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
             document.getElementById('cancelNewsTitle').textContent = data.title;
             document.getElementById('cancelNewsDetails').textContent = '🕒 ' + data.createdAt + ' | Tin đang chờ duyệt';
@@ -235,12 +248,15 @@ function showCancelModal(newsId) {
             // Show the modal
             new bootstrap.Modal(document.getElementById('cancelModal')).show();
         })
-        .catch(error => showToast('Không thể tải chi tiết tin tức: ' + error, 'danger'));
+        .catch(error => {
+            console.error('Error fetching news details:', error);
+            showToast('Không thể tải chi tiết tin tức: ' + error, 'danger');
+        });
 }
 
 // Function to show archived/expired news details
 function showArchivedNewsDetails(newsId, type) {
-    fetch('/News/GetArchivedNewsDetails/' + newsId)
+    fetch('/UserNews/GetArchivedNewsDetails/' + newsId)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -295,7 +311,7 @@ function showRepostModal(newsId) {
     const archivedModal = bootstrap.Modal.getInstance(document.getElementById('archivedNewsModal'));
     if (archivedModal) archivedModal.hide();
 
-    fetch('/News/GetArchivedNewsDetails/' + newsId)
+    fetch('/UserNews/GetArchivedNewsDetails/' + newsId) // Updated from News to UserNews
         .then(response => response.json())
         .then(data => {
             if (data.success) {

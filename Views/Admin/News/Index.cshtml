@@ -1,7 +1,7 @@
 @model IEnumerable<WebBaoDienTu.Models.News>
 
 @{
-    ViewData["Title"] = "Danh sách tin tức";
+    ViewData["Title"] = "Quản lý tin tức";
     Layout = "_Layout";
 }
 
@@ -9,9 +9,6 @@
 <link rel="stylesheet" href="~/css/news-index.css" asp-append-version="true" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="~/css/modal-animations.css" asp-append-version="true" />
 <!-- DateRangePicker CSS -->
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
@@ -19,7 +16,7 @@
 <h2 class="page-title">@ViewData["Title"]</h2>
 
 <p class="text-center">
-    <a asp-action="Create" class="btn btn-primary create-btn"><i class="fas fa-plus"></i> Đăng tin mới</a>
+    <a asp-controller="AdminNews" asp-action="Create" class="btn btn-primary create-btn"><i class="fas fa-plus"></i> Đăng tin mới</a>
 </p>
 
 <div class="container-fluid mt-4">
@@ -30,7 +27,7 @@
                 <div class="filter-header">
                     <h3><i class="fas fa-filter"></i> Bộ lọc nâng cao</h3>
                 </div>
-                <form method="get" asp-action="Index" id="advancedFilterForm">
+                <form method="get" asp-controller="AdminNews" asp-action="Index" id="advancedFilterForm">
                     <div class="filter-group">
                         <div class="filter-title">
                             <i class="fas fa-search"></i> Tìm kiếm
@@ -108,7 +105,6 @@
                         </div>
                     </div>
 
-
                     <div class="filter-actions">
                         <button type="submit" class="btn btn-primary w-100 filter-btn">
                             <i class="fas fa-search"></i> Áp dụng bộ lọc
@@ -185,7 +181,7 @@
                                             </button>
                                             @if (!item.IsApproved)
                                             {
-                                                <form asp-action="Approve" asp-route-id="@item.NewsId" method="post" class="d-inline approve-form">
+                                                <form asp-controller="AdminNews" asp-action="Approve" asp-route-id="@item.NewsId" method="post" class="d-inline approve-form">
                                                     <button type="button" class="btn btn-success btn-sm" onclick="showApproveModal(@item.NewsId)">
                                                         <i class="fas fa-check"></i>
                                                     </button>

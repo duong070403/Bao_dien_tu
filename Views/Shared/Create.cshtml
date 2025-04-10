@@ -4,6 +4,9 @@
     bool isEdit = ViewData["IsEdit"] as bool? ?? false;
     ViewData["Title"] = isEdit ? "Chỉnh sửa tin tức" : "Đăng tin mới";
     Layout = "_Layout";
+
+    // Determine the controller name based on the user role
+    string controllerName = User.IsInRole("Admin") ? "AdminNews" : "UserNews";
 }
 
 <link rel="stylesheet" href="~/css/news-create.css" asp-append-version="true" />
@@ -17,7 +20,7 @@
                     <h3><i class="@(isEdit ? "fas fa-edit" : "fas fa-newspaper") me-2"></i> @ViewData["Title"]</h3>
                 </div>
                 <div class="card-body">
-                    <form id="newsForm" asp-action="@(isEdit ? (User.IsInRole("Admin") ? "Edit" : "UserEdit") : "Create")" method="post" enctype="multipart/form-data">
+                    <form id="newsForm" asp-controller="@controllerName" asp-action="@(isEdit ? "Edit" : "Create")" method="post" enctype="multipart/form-data">
                         @Html.AntiForgeryToken()
 
                         @if (isEdit)
@@ -73,7 +76,7 @@
                             <button type="submit" class="btn btn-primary btn-lg px-4">
                                 <i class="@(isEdit ? "fas fa-save" : "fas fa-paper-plane") me-2"></i> @(isEdit ? "Lưu thay đổi" : "Đăng tin")
                             </button>
-                            <a asp-action="@(User.IsInRole("Admin") ? "Index" : "MyNews")" class="btn btn-outline-secondary btn-lg px-4">
+                            <a asp-controller="@controllerName" asp-action="@(User.IsInRole("Admin") ? "Index" : "MyNews")" class="btn btn-outline-secondary btn-lg px-4">
                                 <i class="fas fa-arrow-left me-2"></i> Hủy
                             </a>
                         </div>
@@ -89,7 +92,7 @@
     <div id="successToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
             <div class="toast-body">
-                <i class="fas fa-check-circle me-2"></i> <!-- Icon thành công -->
+                <i class="fas fa-check-circle me-2"></i>
                 <span id="toastMessage">Thao tác thành công!</span>
             </div>
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
@@ -114,6 +117,7 @@
                 reader.readAsDataURL(file);
             }
         });
+
         document.getElementById('ImageUrl').addEventListener('input', function (e) {
             if (e.target.value) {
                 document.getElementById('ImageFile').value = '';
@@ -137,9 +141,12 @@
             }
         };
 
-                       $('#newsForm').submit(function (e) {
+        $('#newsForm').submit(function (e) {
             e.preventDefault();
             var formData = new FormData(this);
+
+            // Get the controller name based on user role
+            var controller = '@(User.IsInRole("Admin") ? "AdminNews" : "UserNews")';
 
             // Add loading state to button
             var submitButton = $(this).find('button[type="submit"]');
@@ -185,8 +192,6 @@
             });
         });
 
-
-
         function showToast(message, type) {
             var toast = document.getElementById('successToast');
             toast.classList.remove('bg-success', 'bg-danger');
@@ -195,7 +200,5 @@
             var bsToast = new bootstrap.Toast(toast);
             bsToast.show();
         }
-
-
     </script>
 }
