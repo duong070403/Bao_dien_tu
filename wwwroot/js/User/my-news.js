@@ -67,11 +67,12 @@ document.addEventListener('DOMContentLoaded', function () {
     if (searchInput) searchInput.addEventListener('input', filterNews);
     if (statusFilter) statusFilter.addEventListener('change', filterNews);
 
-    // Apply hover effect to all action buttons
+    // Áp dụng hiệu ứng di chuột cho tất cả các nút hành động
     document.querySelectorAll('.action-buttons .btn, .my-news-action-buttons .btn')
         .forEach(btn => btn.classList.add('btn-hover-effect'));
 
-    // Set up CSRF token if not present
+    // Add CSRF token for AJAX requests
+    // Check if the CSRF token input already exists, if not, create it
     if (!document.querySelector('input[name="__RequestVerificationToken"]')) {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         if (csrfToken) {

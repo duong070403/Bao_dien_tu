@@ -24,7 +24,7 @@ namespace WebBaoDienTu.Controllers
         }
 
         #region Public Views
-        // GET: News
+        // GET: News Xem tin tuc
         public async Task<IActionResult> Index(
             string title,
             string author,
@@ -104,7 +104,7 @@ namespace WebBaoDienTu.Controllers
         }
 
 
-        // GET: News/GetNewsDetails/5
+        // GET: News/GetNewsDetails/5 xem chi tiet tin tuc
         public async Task<IActionResult> GetNewsDetails(int id)
         {
             try
@@ -145,7 +145,7 @@ namespace WebBaoDienTu.Controllers
             return RedirectToAction(nameof(Index), new { showDetails = id });
         }
 
-        // GET: News/GetNewsDetailsForDelete/5
+        // GET: News/GetNewsDetailsForDelete/5 
         [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> GetNewsDetailsForDelete(int id)
         {
@@ -175,7 +175,7 @@ namespace WebBaoDienTu.Controllers
         }
 
 
-        // GET: News/Create
+        // GET: News/Create 
         [Authorize(Roles = "User,Admin")]
         public IActionResult Create()
         {
@@ -184,7 +184,7 @@ namespace WebBaoDienTu.Controllers
             return View();
         }
 
-        // POST: News/Create
+        // POST: News/Create - Tạo tin tức mới
         [Authorize(Roles = "User,Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -221,7 +221,7 @@ namespace WebBaoDienTu.Controllers
                     return View(news);
                 }
 
-                // Handle image file upload
+                // Handle image file upload 
                 if (ImageFile != null && ImageFile.Length > 0)
                 {
                     string? imageUrl = await ProcessUploadedImage(ImageFile);

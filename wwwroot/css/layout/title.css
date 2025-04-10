@@ -6,19 +6,20 @@ html, body {
     max-width: 100%;
     margin: 0;
     padding: 0;
+    font-family: Arial, sans-serif;
 }
 
 /* Main Content Padding for Fixed Navbar */
 main {
-    padding-top: 130px; /* Increased for larger navbar */
+    padding-top: 130px; /* Đảm bảo khoảng cách cho navbar cố định */
 }
 
 /* Container Sizing - Increased by 1/3 */
 .container {
     width: 100% !important;
-    max-width: 1760px !important; /* Increased by 1/3 from 1320px */
-    padding-left: 20px !important; /* Increased by 1/3 */
-    padding-right: 20px !important; /* Increased by 1/3 */
+    max-width: 1200px !important; /* Increased by 1/3 from 1320px */
+    padding-left: 16px !important; /* Increased by 1/3 */
+    padding-right: 16px !important; /* Increased by 1/3 */
     margin-right: auto !important;
     margin-left: auto !important;
 }
@@ -26,6 +27,12 @@ main {
 /* Basic Text and Border Styles */
 a {
     color: #0077cc;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #0056b3;
 }
 
 .text-muted {
@@ -44,27 +51,24 @@ a {
 }
 
 .box-shadow {
-    box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05);
 }
 
 /* Navbar - Increased significantly in height and width */
 .navbar {
-    width: 100% !important;
-    max-width: 100% !important;
-    position: fixed !important;
+    width: 100%;
+    position: fixed; /* Đảm bảo navbar luôn cố định */
     top: 0;
     left: 0;
     right: 0;
-    z-index: 1030;
+    z-index: 1050; /* Đặt z-index cao hơn các phần tử khác */
     border-bottom: 1px solid #e0e0e0;
     background-color: #ffffff;
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15); /* Enhanced shadow */
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15); /* Tăng độ nổi bật */
     display: flex;
     align-items: center;
-    padding: 1rem 1.6rem; /* Increased padding */
-    animation: slideDown 0.6s ease-out;
-    height: 130px !important; /* Significantly taller navbar */
-    min-height: 110px !important;
+    padding: 1rem 1.6rem;
+    height: 90px;
 }
 
 /* Logo - Increased by 4/3 */
@@ -73,14 +77,14 @@ a {
 }
 
     .navbar-brand img {
-        height: 160px !important; /* Increased by 4/3 from 67px */
-        width: auto !important;
+        height: 60px;
+        width: auto;
         object-fit: contain;
-        transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transition: transform 0.3s ease;
     }
 
     .navbar-brand:hover img {
-        transform: scale(1.15) rotate(5deg);
+        transform: scale(1.1);
     }
 
 /* Navigation Links - Reduced by 1/4 */
@@ -94,17 +98,15 @@ a {
     text-transform: uppercase;
     font-weight: 700;
     font-family: 'Montserrat', sans-serif;
-    font-size: 1.2rem; /* Reduced by 1/4 from 1.6rem */
-    color: #333 !important;
-    transition: all 0.3s ease-in-out;
-    padding: 0.5rem 1rem; /* Reduced by 1/4 */
-    white-space: nowrap;
+    font-size: 1rem;
+    color: #333;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
 }
 
     .navbar-nav .nav-link:hover {
-        font-size: 1.3rem; /* Reduced by 1/4 */
-        color: #007bff !important;
-        transform: translateY(-3px) scale(1.05);
+        color: #007bff;
+        transform: translateY(-3px);
     }
 
     .navbar-nav .nav-link.active {
@@ -435,17 +437,12 @@ a {
 /* Responsive Adjustments */
 @media (max-width: 992px) {
     .navbar {
-        padding: 0.6rem 0;
-        height: 90px !important;
-        min-height: 90px !important;
+        padding: 0.8rem 1rem;
+        height: 80px;
     }
 
     .navbar-brand img {
-        height: 70px !important;
-    }
-
-    .navbar .input-group {
-        max-width: 350px !important;
+        height: 50px;
     }
 
     main {
@@ -454,24 +451,40 @@ a {
 }
 
 @media (max-width: 768px) {
-    main {
-        padding-top: 90px;
-    }
-
-    .navbar .input-group {
-        max-width: 100% !important;
-        margin: 0.5rem 0;
-    }
-
-    .navbar-nav .nav-link {
-        font-size: 1rem;
+    .navbar {
+        height: 70px;
     }
 
     .navbar-brand img {
-        height: 60px !important;
+        height: 40px;
+    }
+
+    .navbar-nav .nav-link {
+        font-size: 0.9rem;
+    }
+
+    main {
+        padding-top: 80px;
     }
 }
 
+@media (max-width: 480px) {
+    .navbar {
+        height: 60px;
+    }
+
+    .navbar-brand img {
+        height: 35px;
+    }
+
+    .navbar-nav .nav-link {
+        font-size: 0.8rem;
+    }
+
+    main {
+        padding-top: 70px;
+    }
+}
 
 /* Update these styles in wwwroot/css/layout/title.css */
 
