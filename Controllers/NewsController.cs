@@ -1,24 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using WebBaoDienTu.Models;
 
 namespace WebBaoDienTu.Controllers
 {
-    public class NewsController : Controller
+    public class NewsController(BaoDienTuContext context, ILogger<NewsController> logger) : Controller
     {
-        private readonly BaoDienTuContext _context;
-        private readonly ILogger<NewsController> _logger;
-
-        public NewsController(BaoDienTuContext context, ILogger<NewsController> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
+        private readonly BaoDienTuContext _context = context;
+        private readonly ILogger<NewsController> _logger = logger;
 
         #region Public Views
         // GET: News
@@ -102,7 +94,7 @@ namespace WebBaoDienTu.Controllers
 
 
         // GET: News/GetNewsDetails/5
-        public async Task<IActionResult> GetNewsDetails(int id)
+        public async Task<IActionResult> GetNewsDetailsById(int id)
         {
             try
             {
@@ -218,7 +210,7 @@ namespace WebBaoDienTu.Controllers
                     return View(news);
                 }
 
-                // Handle image file upload
+                // Prioritize handling the uploaded image file
                 if (ImageFile != null && ImageFile.Length > 0)
                 {
                     string? imageUrl = await ProcessUploadedImage(ImageFile);
@@ -233,8 +225,7 @@ namespace WebBaoDienTu.Controllers
                         return View(news);
                     }
                 }
-                // Handle image URL
-                if (!string.IsNullOrEmpty(news.ImageUrl))
+                else if (!string.IsNullOrEmpty(news.ImageUrl)) // Handle image URL only if no file is uploaded
                 {
                     string? downloadedImageUrl = await DownloadAndSaveImageFromUrl(news.ImageUrl);
                     if (string.IsNullOrEmpty(downloadedImageUrl))
@@ -261,6 +252,53 @@ namespace WebBaoDienTu.Controllers
             {
                 _logger.LogError(ex, "Error creating news");
                 return Json(new { success = false, message = "Có lỗi xảy ra khi đăng tin." });
+            }
+        }
+
+        private async Task<string?> ProcessUploadedImage(IFormFile imageFile)
+        {
+            try
+            {
+                if (imageFile.Length > 0)
+                {
+                    var filePath = Path.Combine("wwwroot/images", Path.GetRandomFileName());
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await imageFile.CopyToAsync(stream);
+                    }
+                    return filePath.Replace("wwwroot", string.Empty).Replace("\\", "/");
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing uploaded image");
+                return null;
+            }
+        }
+
+        private async Task<string?> DownloadAndSaveImageFromUrl(string imageUrl)
+        {
+            try
+            {
+                using var httpClient = new HttpClient();
+                var response = await httpClient.GetAsync(imageUrl);
+
+                if (!response.IsSuccessStatusCode)
+                    return null;
+
+                var fileName = Path.GetRandomFileName();
+                var filePath = Path.Combine("wwwroot/images", fileName);
+
+                await using var fileStream = new FileStream(filePath, FileMode.Create);
+                await response.Content.CopyToAsync(fileStream);
+
+                return filePath.Replace("wwwroot", string.Empty).Replace("\\", "/");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error downloading and saving image from URL: {ImageUrl}", imageUrl);
+                return null;
             }
         }
 
@@ -347,5 +385,6 @@ namespace WebBaoDienTu.Controllers
                 return Json(new { success = false, message = "Không thể tải chi tiết tin tức." });
             }
         }
+        #endregion
     }
 }
